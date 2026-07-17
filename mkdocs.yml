@@ -1,0 +1,77 @@
+site_name: BioPhasor
+site_description: "Phasor dynamics library for multi-omics cellular biology — encoding, oscillators, synchrony, and machine learning on the unit circle"
+site_author: Mindverse Computing LLC
+site_url: https://mindverse-computing.github.io/biophasor
+repo_url: https://github.com/mindverse-computing/biophasor
+repo_name: mindverse-computing/biophasor
+copyright: "Copyright &copy; 2024&ndash;2026 Mindverse Computing LLC &mdash; CC BY-NC 4.0"
+
+docs_dir: docs
+site_dir: site
+
+# ── Theme: ReadTheDocs (left sidebar + right content, like PhasorFlow) ─────────
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - python
+    - bash
+    - yaml
+
+# ── Markdown Extensions ─────────────────────────────────────────────────────────
+markdown_extensions:
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+      title: On this page
+
+# ── Plugins ─────────────────────────────────────────────────────────────────────
+plugins:
+  - search
+
+# ── MathJax (same config as PhasorFlow) ─────────────────────────────────────────
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js
+
+# ── Navigation (left sidebar) ───────────────────────────────────────────────────
+nav:
+  - Home: index.md
+  - Installation & Quick Start: 01_installation.md
+  - Core Concepts: 02_core_concepts.md
+  - Encoding Strategies: 03_encoding_strategies.md
+  - Phasor Manifold Geometry: 04_phasor_manifold.md
+  - RNA-seq Analysis: 05_rnaseq_analysis.md
+  - Single-Cell RNA-seq: 06_singlecell_analysis.md
+  - Proteomics Analysis: 07_proteomics_analysis.md
+  - Metabolomics Analysis: 08_metabolomics.md
+  - Multi-Omics Integration: 09_multiomics_integration.md
+  - Cell Cycle Assignment: 10_cell_cycle.md
+  - Circadian Rhythm Analysis: 11_circadian_rhythms.md
+  - Gene Network Synchrony: 12_gene_network_synchrony.md
+  - Phasor Classification (ML): 13_phasor_classification.md
+  - Visualization Guide: 14_visualization_guide.md
+  - API Reference: 15_api_reference.md
+  - Cell State Tensor: 16_cell_state_tensor.md

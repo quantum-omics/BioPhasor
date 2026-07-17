@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: >
+  If you use BioPhasor in your research, please cite it as follows.
+title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
+abstract: >
+  BioPhasor is a Python library for phasor-based omics analysis and
+  multi-omics integration. It encodes biological measurements as complex
+  numbers on the unit circle, enabling circular statistics, phase coherence
+  analysis, and oscillatory dynamics for genomics, transcriptomics,
+  proteomics, and metabolomics data.
+authors:
+  - family-names: Mindverse Computing
+    given-names: Team
+    affiliation: "HARMONICS GENOME Project / Mindverse Computing LLC"
+version: 0.1.0
+date-released: "2026-03-21"
+url: "https://github.com/mindverse-computing/biophasor"
+repository-code: "https://github.com/mindverse-computing/biophasor"
+license: CC-BY-NC-4.0
+keywords:
+  - bioinformatics
+  - phasor
+  - omics
+  - multi-omics
+  - systems biology
+  - single-cell
+  - transcriptomics
+  - proteomics
+  - metabolomics
+  - phase coherence
+  - Kuramoto model
+  - circadian rhythms
+  - cell cycle
+preferred-citation:
+  type: software
+  title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
+  authors:
+    - family-names: Mindverse Computing
+      given-names: Team
+  year: 2026
+  url: "https://github.com/mindverse-computing/biophasor"
+  version: 0.1.0

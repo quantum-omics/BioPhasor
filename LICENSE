@@ -1,21 +1,63 @@
-MIT License
+Copyright (c) 2024-2026 Mindverse Computing LLC
 
-Copyright (c) 2026 Mindverse Computing
+PATENT AND TRADEMARK RESERVATION
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International (CC BY-NC 4.0) license.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+IMPORTANT: This license pertains strictly to the copyright of the source
+code and associated documentation. No patent rights are granted, implied,
+or transferred herein. Mindverse Computing LLC reserves all rights to any
+patentable inventions, methods, or systems embodied in this software.
+Furthermore, this license does not grant permission to use the trade names,
+trademarks, service marks, or product names of Mindverse Computing LLC.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+--------------------------------------------------------------------------------
+
+CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL 4.0 INTERNATIONAL
+
+By exercising the Licensed Rights (defined below), You accept and agree to
+be bound by the terms and conditions of this Creative Commons
+Attribution-NonCommercial 4.0 International Public License ("Public License").
+
+1. GRANT OF RIGHTS
+
+Subject to the terms and conditions of this Public License, the Licensor
+hereby grants You a worldwide, royalty-free, non-sublicensable,
+non-exclusive, irrevocable license to exercise the Licensed Rights in the
+Licensed Material to:
+
+  * Reproduce and Share the Licensed Material, in whole or in part, for
+    Non-Commercial purposes only; and
+  * Produce, reproduce, and Share Adapted Material for Non-Commercial
+    purposes only.
+
+2. ATTRIBUTION
+
+If You Share the Licensed Material, You must:
+
+  * Retain the copyright notice and identification of the Licensor;
+  * Indicate if You modified the Licensed Material; and
+  * Provide a link to the license.
+
+3. NON-COMMERCIAL RESTRICTION
+
+Non-Commercial means not primarily intended for or directed towards
+commercial advantage or monetary compensation. For the avoidance of doubt,
+use by a for-profit entity for internal commercial R&D, production
+environments, or profit-generating activities is prohibited under this
+license and requires a separate commercial agreement from Mindverse
+Computing LLC.
+
+4. DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY
+
+The Licensed Material is offered AS-IS and AS-AVAILABLE, and the Licensor
+makes no representations or warranties of any kind concerning the Licensed
+Material, whether express, implied, statutory, or other. This includes,
+without limitation, warranties of title, merchantability, fitness for a
+particular purpose, non-infringement, or the absence of latent or other
+defects, accuracy, or the presence or absence of errors, whether or not
+known or discoverable.
+
+For the full legal text, see:
+https://creativecommons.org/licenses/by-nc/4.0/legalcode

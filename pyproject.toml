@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "biophasor"
+version = "0.1.0"
+description = "Phasor dynamics library for omics data and multi-omics integration"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["bioinformatics", "phasor", "omics", "multi-omics", "systems-biology", "single-cell"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: Free for non-commercial use",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "torch>=2.1",
+    "anndata>=0.10",
+    "scanpy>=1.9",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "networkx>=3.2",
+    "pandas>=2.0",
+    "h5py>=3.9",
+]
+
+[project.optional-dependencies]
+tda = ["gudhi>=3.9"]
+spatial = ["squidpy>=1.4"]
+ml = ["torch-geometric>=2.5"]
+dev = ["pytest>=7.4", "pytest-cov", "black", "ruff", "mypy"]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+    "pymdown-extensions>=10.7",
+    "mike>=2.0",              # versioned docs
+]
+all = ["biophasor[tda,spatial,ml,dev,docs]"]
+
+
+[project.urls]
+Repository = "https://github.com/mindverse-computing/biophasor"
+Documentation = "https://biophasor.readthedocs.io"
+
+[tool.setuptools]
+package-dir = { "biophasor" = "." }
+packages = [
+    "biophasor",
+    "biophasor.analysis",
+    "biophasor.core",
+    "biophasor.cst",
+    "biophasor.dynamics",
+    "biophasor.experiments",
+    "biophasor.integration",
+    "biophasor.io",
+    "biophasor.ml",
+    "biophasor.network",
+    "biophasor.transform",
+    "biophasor.utils",
+    "biophasor.visualization",
+]
+
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
