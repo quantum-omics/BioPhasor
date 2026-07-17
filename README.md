@@ -107,16 +107,6 @@ python experiments/codes/exp09_quantum_classical_bridge.py
 
 ---
 
-## Related Projects
-
-BioPhasor is part of the **Mindverse Computing** phasor dynamics ecosystem:
-
-| Project | Domain |
-|---|---|
-| [NeuroPhasor](https://github.com/mindverse-computing/neurophasor) | BCI and cognitive state phasor dynamics |
-| [PhasorFlow](https://github.com/mindverse-computing/phasorflow) | Unit-circle computing library |
-
----
 
 ## License
 
