@@ -6,7 +6,7 @@ __pycache__/
 .env
 .venv*
 experiments/
-LICENSING.md
+
 REPRODUCE.md
 reproduce.sh
 reproduce/
