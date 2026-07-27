@@ -6,7 +6,8 @@ Phasor representations are stored in AnnData objects:
   - varm['phasor_<modality>']    : (n_genes, n_features) complex  — per-gene phasors
   - uns['biophasor']             : metadata dict
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

@@ -1,7 +1,15 @@
 """
-biophasor.network — Phasor graph networks.
+biophasor.network — biological graph networks.
 
-Placeholder for Phase 3. See implementation_plan.md for full design.
-
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+The canonical implementation now lives in :mod:`biophasor.core.graph`
+(migrated from phnn-omics). This module re-exports it.
 """
+from biophasor.core.graph import (  # noqa: F401
+    build_biological_graph, build_compartment_structure,
+    compute_plv_prior, print_graph_summary,
+)
+
+__all__ = [
+    "build_biological_graph", "build_compartment_structure",
+    "compute_plv_prior", "print_graph_summary",
+]

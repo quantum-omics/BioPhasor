@@ -14,7 +14,8 @@ Following the pipeline in Notebooks 2.1 / 2.2 (CLL multi-omics):
     2. Concatenate or fuse
     3. Measure per-layer and cross-layer coherence
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations
@@ -90,7 +91,31 @@ class MultiOmicsIntegrator:
                 "Use method='concat' or align features first."
             )
 
-        # Weighted complex mean
+        if method == "coherence_gated":
+            # Per-feature GATED fusion: for each feature, take the modality whose
+            # across-sample coherence is highest, rather than circular-averaging
+            # all layers. A consensus circular mean can never exceed the more
+            # coherent input; gating can, because it never mixes a low-coherence
+            # layer into a high-coherence feature. Selection uses only the
+            # coherence statistic (no labels), so it introduces no leakage.
+            from biophasor.core.operators import coherence
+            C = np.stack([coherence(p, axis=0) for p in phases], axis=0)  # (M, F)
+            pick = C.argmax(axis=0)                                       # (F,)
+            stacked = np.stack(phases, axis=0)                            # (M, N, F)
+            F = stacked.shape[2]
+            return stacked[pick, :, np.arange(F)].T                       # (N, F)
+
+        if method == "coherence_weighted":
+            # Soft per-feature coherence weighting (continuous relaxation of the
+            # gate): weight each modality per feature by its across-sample
+            # coherence before the complex sum.
+            from biophasor.core.operators import coherence
+            C = np.stack([coherence(p, axis=0) for p in phases], axis=0)  # (M, F)
+            wpf = C / (C.sum(axis=0, keepdims=True) + 1e-12)              # (M, F)
+            z = sum(wpf[i][None, :] * np.exp(1j * phases[i]) for i in range(len(phases)))
+            return np.angle(z)
+
+        # method == 'circular_mean': global weighted complex mean (legacy).
         if self.weights is not None:
             w = self.weights[:len(phases)]
         else:

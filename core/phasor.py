@@ -12,7 +12,8 @@ Encoding strategies (Manuscript Eq. 15):
     Strategy 2 — Tanh-phase (DEFAULT; outlier-robust):
         φ = π · tanh( (log1p(x) − μ) / σ )     per-feature z-score in log space
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

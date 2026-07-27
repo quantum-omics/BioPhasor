@@ -9,14 +9,13 @@ abstract: >
   analysis, and oscillatory dynamics for genomics, transcriptomics,
   proteomics, and metabolomics data.
 authors:
-  - family-names: Mindverse Computing
-    given-names: Team
-    affiliation: "HARMONICS GENOME Project / Mindverse Computing LLC"
+  - name: "Quantum Omics Foundation"
+    website: "https://github.com/quantum-omics-foundation"
 version: 0.1.0
 date-released: "2026-03-21"
-url: "https://github.com/mindverse-computing/biophasor"
-repository-code: "https://github.com/mindverse-computing/biophasor"
-license: CC-BY-NC-4.0
+url: "https://github.com/quantum-omics-foundation/biophasor"
+repository-code: "https://github.com/quantum-omics-foundation/biophasor"
+license: Apache-2.0
 keywords:
   - bioinformatics
   - phasor
@@ -35,8 +34,7 @@ preferred-citation:
   type: software
   title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
   authors:
-    - family-names: Mindverse Computing
-      given-names: Team
+    - name: "Quantum Omics Foundation"
   year: 2026
-  url: "https://github.com/mindverse-computing/biophasor"
+  url: "https://github.com/quantum-omics-foundation/biophasor"
   version: 0.1.0

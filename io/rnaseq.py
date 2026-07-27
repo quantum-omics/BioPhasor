@@ -3,7 +3,8 @@ biophasor.io.rnaseq — Bulk RNA-seq loader.
 
 Loads counts matrix, applies library-size normalisation, and encodes as phasors.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

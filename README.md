@@ -1,133 +1,158 @@
+<div align="center">
+
 # BioPhasor
 
-[![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey?style=flat-square)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square)](https://www.python.org/)
-[![bioRxiv](https://img.shields.io/badge/bioRxiv-forthcoming-b31b1b?style=flat-square)]()
+**A phase-geometric library for multi-omics systems biology.**
 
-**BioPhasor** is a phase-native computational framework for multi-omics systems biology and cellular state modeling. It encodes omics features (RNA-seq, ATAC-seq, single-cell, proteomics, metabolomics) as complex phasors on the $N$-torus $\mathbb{T}^N$ and extracts interpretable cellular state descriptors via the **Cell State Tensor** (CST) — a rank-3 object encoding pathway-resolved, sample-specific phase-amplitude dynamics.
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Stewarded by Quantum Omics Foundation](https://img.shields.io/badge/stewarded%20by-Quantum%20Omics%20Foundation-8a90ff.svg)](https://github.com/quantum-omics-foundation)
 
-This repository is the reference implementation for the manuscript:
-
-> D. Sigdel, *BioPhasor: Decoding Cellular State Tensors from Multi-Omics Phasor Dynamics for Quantum-Ready Systems Biology*, bioRxiv (forthcoming), 2026.
-
----
-
-## Methodology
-
-BioPhasor provides an end-to-end pipeline from raw omics measurements to cellular state estimates. Its core constructs are:
-
-- **Tanh-Phase Encoding** — Maps continuous omics modalities (RNA-seq, proteomics) to phase values on the unit circle:
-
-$$\varphi = \pi \cdot \tanh\!\left(\frac{\log(1+x) - \mu}{\sigma}\right), \quad z = A \cdot e^{i\varphi}$$
-
-- **Phase Coherence** — Universal quality and synchronization metric based on mean resultant length:
-
-$$C = \left|\frac{1}{N}\sum\_{n=1}^{N} e^{i\varphi\_n}\right| \in [0, 1]$$
-
-- **Gene Regulatory Network Dynamics** — Simulates Kuramoto synchronization dynamics on arbitrary gene regulatory networks (GRNs):
-
-$$\dot{\varphi}\_i = \omega\_i + \frac{K}{N}\sum\_j A\_{ij}\sin(\varphi\_j - \varphi\_i) + \eta\_i(t)$$
-
-- **Cell State Tensor (CST)** — Four attractor-geometric descriptors derived from the phasor field:
-
-| Descriptor | Definition | Interpretation |
-|---|---|---|
-| $R(t)$ | Kuramoto order parameter | Global pathway synchrony |
-| $\mathcal{C}(t)$ | Temporal coherence | Basin stability |
-| $E(t)$ | Phase entropy | Attractor diversity |
-| $V(t)$ | Phase velocity | State transition rate |
-
-- **Quantum-Classical Duality** — Each classical phasor operation (Shift/Mix/DFT) maps one-to-one onto a quantum circuit gate ($R\_z$/CNOT/QFT), providing a validated path to quantum hardware execution.
+</div>
 
 ---
 
-## Key Results
+## Overview
 
-Evaluated on public cancer genomics datasets (GEO, CPTAC):
+Omics measurements are usually treated as magnitudes. BioPhasor treats them as
+**phases**: each feature is mapped to a point on the unit circle, so a sample
+becomes a point on the $N$-torus $\mathbb{T}^N$. Relationships between features
+then become geometric — alignment, coherence, and synchrony — and the tools of
+circular statistics and coupled-oscillator dynamics apply directly.
 
-| Finding | Value |
-|---|---|
-| Tanh-phase encoding coherence (BRCA) | $C = 0.71$ (vs linear PCA $0.48$) |
-| Cell-cycle phase assignment accuracy | $0.89$ ARI against fluorescence ground truth |
-| GRN Kuramoto critical coupling | $K\_c = 12.4$ (empirical), $K\_c = 11.8$ (analytic) |
-| Multi-omics integration (RNA + ATAC) | Silhouette $= 0.62$ (vs CCA $0.41$) |
-| CST CP rank-3 reconstruction | RMSE $= 1.74$ |
-| Quantum coherence tracks Kuramoto $R$ | $r = 0.937$ |
+This makes a set of otherwise awkward questions natural to ask:
 
-> Phase-based integration preserves oscillatory structure in gene expression that linear methods (PCA, CCA) collapse — consistent with the circadian and cell-cycle periodicity of transcriptomic programs.
+- How synchronised is a pathway, as a single number in $[0, 1]$?
+- Which genes lead and which lag, and by how much?
+- Is a cell population approaching a limit cycle, or drifting away from one?
+- How do transcript and protein layers fall in and out of step over time?
 
----
+BioPhasor provides the shared machinery for that: encoding, circular operators,
+biological graphs, oscillator dynamics, the Cell State Tensor, and a
+port-Hamiltonian modelling layer.
 
 ## Installation
 
+Requires Python 3.10 or newer.
+
 ```bash
-git clone https://github.com/mindverse-computing/biophasor.git
-cd biophasor
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[full]"
+pip install -e .
 ```
 
-Requires Python ≥ 3.10. Core dependencies: NumPy, SciPy, scanpy, scikit-learn, matplotlib.
+Optional extras:
 
----
+| Extra | Adds | For |
+|---|---|---|
+| `dev` | pytest, black, ruff, mypy | development |
+| `tda` | gudhi | topological data analysis |
+| `spatial` | squidpy | spatial transcriptomics |
+| `ml` | torch-geometric | graph neural networks |
+| `vpc` | phasorflow | variational phasor circuits |
 
-## Quick Start
+```bash
+pip install -e ".[dev]"
+```
+
+## Quick start
 
 ```python
-import biophasor as bp
+import numpy as np
+from biophasor.core.encoder import tanh_phase_encode
+from biophasor.core.operators import coherence
 
-# Encode gene expression as phasors
-phasor = bp.tanh_phase_encode(X_rna)       # phi in [-pi, pi] per gene per sample
+rng = np.random.default_rng(0)
+x = rng.lognormal(size=(20, 200))      # 20 samples x 200 features
 
-# Compute phase coherence
-C = bp.coherence(phasor)                    # (n_genes,)
+phi = tanh_phase_encode(x)             # phases in (-pi, pi], same shape as x
+C = coherence(phi, axis=1)             # per-sample phase coherence in [0, 1]
 
-# Multi-omics integration
-rna = bp.tanh_phase_encode(X_rna)
-atac = bp.tanh_phase_encode(X_atac)
-fused = bp.integrate([rna, atac])           # weighted circular mean fusion
-
-# Construct the Cell State Tensor
-from biophasor.cst import CellStateTensor
-cst = CellStateTensor.from_phasor(phasor, pathways="hallmark")
-descriptors = cst.descriptors()             # R(t), C(t), E(t), V(t)
+print(C.shape, round(float(C.min()), 3), round(float(C.max()), 3))
+# (20,) 0.13 0.345
 ```
 
----
+`coherence` is the mean resultant length — the Kuramoto order parameter when no
+amplitude weighting is given. A value near 0 means the features are dispersed
+around the circle; near 1 means they are aligned.
 
-## Reproducing Experiments
+## How it works
 
-The `experiments/` directory contains seeded scripts that reproduce every result reported in the manuscript from open public datasets (GEO, CPTAC). Each script writes a results JSON and corresponding figures.
+**Tanh-phase encoding** maps a continuous measurement to phase, standardising on
+the log scale so that heavy-tailed omics distributions spread evenly around the
+circle rather than bunching:
+
+$$\varphi = \pi \cdot \tanh\!\left(\frac{\log(1+x) - \mu}{\sigma}\right)$$
+
+**Phase coherence** summarises how aligned a set of phases is:
+
+$$C = \left|\frac{1}{N}\sum_{n=1}^{N} e^{i\varphi_n}\right| \in [0, 1]$$
+
+Because both are defined on the circle, downstream analysis inherits circular
+statistics for free — circular means, phase differences that wrap correctly, and
+synchrony measures that do not depend on an arbitrary origin.
+
+## Package layout
+
+| Module | Contents |
+|---|---|
+| `biophasor.core` | encoding, circular operators, biological graphs, loss functions, pathway sets, data generation |
+| `biophasor.transform` | phasor transforms and alternative encoders |
+| `biophasor.cst` | Cell State Tensor — geometry, attractors, limit cycles |
+| `biophasor.dynamics` | coupled-oscillator models: Kuramoto, circadian, cell cycle, synchrony |
+| `biophasor.integration` | multi-omics fusion across modalities |
+| `biophasor.phnn` | port-Hamiltonian neural networks — models, training, integrators |
+| `biophasor.spectral` | spectral connectome, spectral omics, quantum duality |
+| `biophasor.ml` | classifiers and circular loss functions |
+| `biophasor.io` | loaders for RNA-seq, single-cell, proteomics, metabolomics |
+| `biophasor.network` | network construction and analysis |
+| `biophasor.viz`, `.visualization` | phasor plots and figure helpers |
+| `biophasor.utils` | AnnData helpers, math utilities, logging |
+
+## Testing
 
 ```bash
-python experiments/codes/exp01_encoding_cst.py
-python experiments/codes/exp05_kuramoto_grn.py
-python experiments/codes/exp09_quantum_classical_bridge.py
+pip install -e ".[dev]"
+pytest
 ```
 
----
+The suite covers the core operators, the Cell State Tensor, oscillator dynamics,
+multi-omics integration, the port-Hamiltonian layer, and the spectral module.
 
+## Contributing
+
+Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the
+development workflow, coding conventions, and the DCO sign-off we ask for on
+each commit:
+
+```bash
+git commit -s -m "feat: your change"
+```
+
+Please open an issue before starting substantial work, so we can check it fits
+the library's scope and is not already in progress.
+
+## Citing
+
+If BioPhasor supports your research, please cite it — see
+[`CITATION.cff`](CITATION.cff), which GitHub renders as a ready-to-use citation
+in the sidebar.
+
+## Governance
+
+BioPhasor is stewarded by the **Quantum Omics Foundation**, a nonprofit
+organisation advancing open research and education at the interface of quantum
+computing and the life sciences. The Foundation's remit is to keep this work
+openly available, reproducible, and usable by the wider research community.
 
 ## License
 
-Released under the **CC BY-NC 4.0** license; commercial use is prohibited. See [LICENSE](LICENSE) for patent and trademark reservations by Mindverse Computing LLC.
+Licensed under the **Apache License 2.0** — see [`LICENSE`](LICENSE) and
+[`NOTICE`](NOTICE). [`LICENSING.md`](LICENSING.md) records why Apache-2.0 was
+chosen over a shorter permissive licence.
 
----
+In brief: you may use, modify, distribute, and build commercial work on this
+code. Retain the copyright notice, the `NOTICE` file, and a copy of the licence
+in any redistribution, and state any changes you made.
 
-## Citation
-
-```bibtex
-@article{sigdel2026biophasor,
-  title   = {BioPhasor: Decoding Cellular State Tensors from
-             Multi-Omics Phasor Dynamics for Quantum-Ready
-             Systems Biology},
-  author  = {Sigdel, Dibakar},
-  journal = {bioRxiv preprint (forthcoming)},
-  year    = {2026},
-  url     = {https://github.com/mindverse-computing/biophasor}
-}
-```
-
----
-
-[Mindverse Computing](https://www.mindversecomputing.com) · Quantum Virtual Mind (QVM) Project
+Datasets used in research built on this library carry their own terms — check
+the original source before redistributing data.

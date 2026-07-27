@@ -4,7 +4,8 @@ biophasor.ml.losses — Phasor-aware training objectives.
     circular_mse_loss : MSE on the unit circle (wraps angular difference)
     coherence_loss    : 1 − R²   where R = |mean(e^{iφ})|
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

@@ -12,7 +12,8 @@ where j is the harmonic index (j=1 for fundamental frequency).
 The resulting phasor  z = G + iS  lies on or inside the unit semicircle
 (G²+S² ≤ 1) when the intensity is non-negative.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

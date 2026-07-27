@@ -7,7 +7,8 @@ Maps single cells to G1/S/G2/M phases using canonical marker gene phasors:
 
 Reference marker sets: Tirosh et al. 2016 (Seurat v2 gene sets).
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations

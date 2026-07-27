@@ -1,7 +1,8 @@
 """
 biophasor.ml — Machine learning models for omics phasor data.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from biophasor.ml.classifier import PhasorClassifier

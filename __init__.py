@@ -1,7 +1,8 @@
 """
 BioPhasor: Phasor Dynamics Library for Omics Data.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from importlib.metadata import version, PackageNotFoundError
@@ -9,7 +10,7 @@ from importlib.metadata import version, PackageNotFoundError
 try:
     __version__ = version("biophasor")
 except PackageNotFoundError:
-    __version__ = "0.2.0"
+    __version__ = "0.3.0"
 
 # ── Core conveniences ─────────────────────────────────────────────────────────
 from biophasor.core.phasor import BioPhasor

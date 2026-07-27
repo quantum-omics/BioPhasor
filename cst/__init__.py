@@ -11,7 +11,8 @@ Core components for phase-coupled dissipative system analysis in cellular biolog
 The CST is the biological analogue of the Mental State Tensor (MST) in the
 Neurophasor framework, adapted for multi-omics cellular data.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from biophasor.cst.tensor import CellStateTensor

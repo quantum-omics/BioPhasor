@@ -1,10 +1,10 @@
 site_name: BioPhasor
 site_description: "Phasor dynamics library for multi-omics cellular biology — encoding, oscillators, synchrony, and machine learning on the unit circle"
-site_author: Mindverse Computing LLC
-site_url: https://mindverse-computing.github.io/biophasor
-repo_url: https://github.com/mindverse-computing/biophasor
-repo_name: mindverse-computing/biophasor
-copyright: "Copyright &copy; 2024&ndash;2026 Mindverse Computing LLC &mdash; CC BY-NC 4.0"
+site_author: Quantum Omics Foundation
+site_url: https://quantum-omics-foundation.github.io/biophasor
+repo_url: https://github.com/quantum-omics-foundation/biophasor
+repo_name: quantum-omics-foundation/biophasor
+copyright: "Copyright &copy; 2024&ndash;2026 Quantum Omics Foundation &mdash; Apache-2.0"
 
 docs_dir: docs
 site_dir: site

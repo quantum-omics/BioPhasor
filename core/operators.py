@@ -9,7 +9,8 @@ Implements the fundamental phasor operations:
   - bio_mix()        : 50/50 beam-splitter (complex average)
   - coherence_filter(): retain only features with C > threshold
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations
@@ -187,3 +188,46 @@ def coherence_filter(
     C = coherence(phase, amplitude=amplitude, axis=0)
     mask = C >= threshold
     return phase[:, mask], mask
+
+
+# ── Circular-statistics helpers (canonical home; used platform-wide) ──────────
+
+def phase_coherence(theta: np.ndarray) -> float:
+    """
+    Global phase coherence C = |⟨e^{iθ}⟩| ∈ [0, 1] over a flattened phase array.
+
+    Equal to the Kuramoto order parameter R of the phase set. This is the
+    flattened, scalar convenience form of :func:`coherence`; the former
+    spectral-omics ``connectome.phasor.phase_coherence`` re-exports this.
+    """
+    theta = np.asarray(theta, dtype=float).ravel()
+    if theta.size == 0:
+        return 0.0
+    return float(np.abs(np.mean(np.exp(1j * theta))))
+
+
+def phasor_statistics(psi: np.ndarray) -> dict:
+    """
+    Aggregate phasor statistics for one sample slice ψ ∈ ℂ^N.
+
+    Returns keys: coherence_R, mean_phase, phase_variance, amplitude_mean,
+    amplitude_std, clustering_index (fraction of vertices within π/4 of the
+    mean phase). Canonical home for the former spectral-omics
+    ``connectome.phasor.PhasorEncoder.phasor_statistics``.
+    """
+    psi = np.asarray(psi, dtype=complex).ravel()
+    angles = np.angle(psi)
+    amps = np.abs(psi)
+    R = float(np.abs(np.mean(np.exp(1j * angles)))) if angles.size else 0.0
+    mean_phase = float(np.angle(np.mean(np.exp(1j * angles)))) if angles.size else 0.0
+    diff = np.abs(np.angle(np.exp(1j * (angles - mean_phase))))
+    clustering = float(np.mean(diff < (np.pi / 4))) if angles.size else 0.0
+    circ_var = 1.0 - R
+    return {
+        "coherence_R": R,
+        "mean_phase": mean_phase,
+        "phase_variance": circ_var,
+        "amplitude_mean": float(amps.mean()) if amps.size else 0.0,
+        "amplitude_std": float(amps.std()) if amps.size else 0.0,
+        "clustering_index": clustering,
+    }

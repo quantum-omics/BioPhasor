@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "biophasor"
-version = "0.1.0"
-description = "Phasor dynamics library for omics data and multi-omics integration"
+version = "0.3.0"
+description = "BioPhasor platform: unified phasor-geometric core (encoding, circular statistics, graphs, dynamics) with phnn and spectral omics domains"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
@@ -14,7 +14,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
-    "License :: Free for non-commercial use",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -24,6 +24,7 @@ dependencies = [
     "numpy>=1.24",
     "scipy>=1.11",
     "torch>=2.1",
+    "scikit-learn>=1.3",
     "anndata>=0.10",
     "scanpy>=1.9",
     "matplotlib>=3.8",
@@ -37,6 +38,21 @@ dependencies = [
 tda = ["gudhi>=3.9"]
 spatial = ["squidpy>=1.4"]
 ml = ["torch-geometric>=2.5"]
+# Variational Phasor Circuit backend. Separate project on PyPI; without it the
+# VPC-backed paths fall back to logistic regression (biophasor.ml.classifier).
+vpc = ["phasorflow>=0.3"]
+# Datasets + methods used only by experiments/ (not by the importable package):
+#   GEOparse  — shared GEO fetch/cache in experiments/_shared/common.py
+#   cptac     — CPTAC UCEC multi-omics loader (biophasor manuscript)
+#   mofapy2, snfpy, lifelines, tensorly — benchmark competitors / survival / TT
+experiments = [
+    "GEOparse>=2.0",
+    "cptac>=1.5",
+    "mofapy2>=0.7",
+    "snfpy>=0.2",
+    "lifelines>=0.27",
+    "tensorly>=0.8",
+]
 dev = ["pytest>=7.4", "pytest-cov", "black", "ruff", "mypy"]
 docs = [
     "mkdocs-material>=9.5",
@@ -44,22 +60,27 @@ docs = [
     "pymdown-extensions>=10.7",
     "mike>=2.0",              # versioned docs
 ]
-all = ["biophasor[tda,spatial,ml,dev,docs]"]
+all = ["biophasor[tda,spatial,ml,vpc,experiments,dev,docs]"]
 
 
 [project.urls]
-Repository = "https://github.com/mindverse-computing/biophasor"
+Repository = "https://github.com/quantum-omics-foundation/biophasor"
 Documentation = "https://biophasor.readthedocs.io"
 
 [tool.setuptools]
+# biophasor is the repo root. The phasor-circuit engine `phasorflow` is a
+# separate project distributed on PyPI: `pip install phasorflow`. It is an
+# optional dependency here — the VPC-backed paths degrade to a documented
+# fallback when it is absent (see the `vpc` extra).
 package-dir = { "biophasor" = "." }
 packages = [
     "biophasor",
     "biophasor.analysis",
     "biophasor.core",
+    "biophasor.core.graph",
+    "biophasor.core.datagen",
     "biophasor.cst",
     "biophasor.dynamics",
-    "biophasor.experiments",
     "biophasor.integration",
     "biophasor.io",
     "biophasor.ml",
@@ -67,6 +88,17 @@ packages = [
     "biophasor.transform",
     "biophasor.utils",
     "biophasor.visualization",
+    "biophasor.viz",
+    # ── domain subpackages (unified platform) ──
+    "biophasor.phnn",
+    "biophasor.phnn.models",
+    "biophasor.phnn.training",
+    "biophasor.phnn.utils",
+    "biophasor.spectral",
+    "biophasor.spectral.connectome",
+    "biophasor.spectral.omics",
+    "biophasor.spectral.quantum",
+    # ── vendored phasor-circuit engine (installed with the platform) ──
 ]
 
 

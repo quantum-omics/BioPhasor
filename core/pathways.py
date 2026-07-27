@@ -35,7 +35,8 @@ subset" fallback — here the full 50, not a subset). To regenerate / refresh:
 If gseapy / the Enrichr endpoint is unavailable, this embedded copy is used
 directly — the module never requires network access at import time.
 
-(c) 2026 Mindverse Computing LLC. Licensed under CC BY-NC 4.0.
+SPDX-License-Identifier: Apache-2.0
+Copyright 2024-2026 Quantum Omics Foundation
 """
 
 from __future__ import annotations
