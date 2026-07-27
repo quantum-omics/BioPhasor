@@ -1,21 +1,20 @@
 cff-version: 1.2.0
-message: >
-  If you use BioPhasor in your research, please cite it as follows.
+message: "If you use BioPhasor in your research, please cite the software and the relevant preprint below."
 title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
-abstract: >
-  BioPhasor is a Python library for phasor-based omics analysis and
-  multi-omics integration. It encodes biological measurements as complex
-  numbers on the unit circle, enabling circular statistics, phase coherence
-  analysis, and oscillatory dynamics for genomics, transcriptomics,
-  proteomics, and metabolomics data.
+abstract: >-
+  BioPhasor is a Python library for phasor-based omics analysis and multi-omics
+  integration. It encodes biological measurements as complex numbers on the unit
+  circle, enabling circular statistics, phase coherence analysis, and
+  oscillatory dynamics for genomics, transcriptomics, proteomics, and
+  metabolomics data.
+type: software
 authors:
   - name: "Quantum Omics Foundation"
     website: "https://github.com/quantum-omics-foundation"
 version: 0.1.0
-date-released: "2026-03-21"
+license: Apache-2.0
 url: "https://github.com/quantum-omics-foundation/biophasor"
 repository-code: "https://github.com/quantum-omics-foundation/biophasor"
-license: Apache-2.0
 keywords:
   - bioinformatics
   - phasor
@@ -30,11 +29,30 @@ keywords:
   - Kuramoto model
   - circadian rhythms
   - cell cycle
+  - port-Hamiltonian
 preferred-citation:
-  type: software
-  title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
+  type: article
+  title: "BioPhasor: Decoding Cellular State Tensors from Multi-Omics Phasor Dynamics for Quantum Ready Systems Biology"
   authors:
-    - name: "Quantum Omics Foundation"
+    - family-names: Sigdel
+      given-names: Dibakar
+    - family-names: Panday
+      given-names: Namuna
   year: 2026
-  url: "https://github.com/quantum-omics-foundation/biophasor"
-  version: 0.1.0
+  month: 7
+  journal: bioRxiv
+  doi: 10.64898/2026.07.17.739210
+  url: "https://doi.org/10.64898/2026.07.17.739210"
+references:
+  - type: article
+    title: "Learning the Cellular Dynamics as a Port-Hamiltonian System: A Composite Multi-Clock GNN-Surrogate for Multi-Omics Circadian Cell Biology"
+    authors:
+      - family-names: Sigdel
+        given-names: Dibakar
+      - family-names: Panday
+        given-names: Namuna
+    year: 2026
+    month: 7
+    journal: bioRxiv
+    doi: 10.64898/2026.07.11.737972
+    url: "https://doi.org/10.64898/2026.07.11.737972"

@@ -3,6 +3,18 @@ __pycache__/
 *.py[codz]
 *$py.class
 .DS_Store
+.env
+.venv*
+experiments/
+LICENSING.md
+REPRODUCE.md
+reproduce.sh
+reproduce/
+manuscript/
+docs/
+results/
+notebooks/
+
 
 # C extensions
 *.so
@@ -217,3 +229,46 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- BioPhasor project-specific ---
+# Real data cache (re-downloadable via experiments/realdata_feasibility/biophasor_realdata_loader.py)
+# Matches top-level data/ AND nested experiments/**/data/
+data/
+# Heavy data / model artifacts — keep code + small result figures/JSON, exclude large binaries
+*.h5
+*.hdf5
+*.h5ad
+*.loom
+*.mtx
+*.tsv.gz
+*.csv.gz
+*.npy
+*.npz
+*.tar
+*.tar.gz
+*.zip
+*.ckpt
+*.pt
+*.pth
+# LaTeX build cruft (if manuscripts are ever colocated)
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Shared raw-data cache (large public datasets — rebuilt via experiments/_shared/common.py)
+experiments/_shared/data/raw/
+experiments/*/data/raw/
+experiments/*/checkpoints/
+
+# ── Not published to GitHub ───────────────────────────────────────────────────
+# The public repository ships the installable `biophasor` package only.
+# Experiments, notebooks, manuscript sources, and built docs are kept local.
+experiments/
+docs/
+manuscript/
+*.ipynb
+REPRODUCE.md
+reproduce.sh

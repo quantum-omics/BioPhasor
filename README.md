@@ -131,11 +131,49 @@ git commit -s -m "feat: your change"
 Please open an issue before starting substantial work, so we can check it fits
 the library's scope and is not already in progress.
 
+## Preprints
+
+Two preprints describe the methods implemented here. Both are on bioRxiv.
+
+**BioPhasor: Decoding Cellular State Tensors from Multi-Omics Phasor Dynamics for Quantum Ready Systems Biology**
+Sigdel, D., & Panday, N. (2026). *bioRxiv*.
+[doi:10.64898/2026.07.17.739210](https://doi.org/10.64898/2026.07.17.739210)
+
+Introduces the phasor representation of multi-omics measurements and the Cell
+State Tensor — the geometry behind `biophasor.core` and `biophasor.cst`.
+
+**Learning the Cellular Dynamics as a Port-Hamiltonian System: A Composite Multi-Clock GNN-Surrogate for Multi-Omics Circadian Cell Biology**
+Sigdel, D., & Panday, N. (2026). *bioRxiv*.
+[doi:10.64898/2026.07.11.737972](https://doi.org/10.64898/2026.07.11.737972)
+
+Casts cellular dynamics as a port-Hamiltonian system with coupled biological
+clocks — the basis for `biophasor.phnn` and `biophasor.dynamics`.
+
+```bibtex
+@article{sigdel2026biophasor,
+  author  = {Sigdel, Dibakar and Panday, Namuna},
+  title   = {BioPhasor: Decoding Cellular State Tensors from Multi-Omics Phasor Dynamics for Quantum Ready Systems Biology},
+  journal = {bioRxiv},
+  year    = {2026},
+  doi     = {10.64898/2026.07.17.739210},
+  url     = {https://doi.org/10.64898/2026.07.17.739210}
+}
+
+@article{sigdel2026porthamiltonian,
+  author  = {Sigdel, Dibakar and Panday, Namuna},
+  title   = {Learning the Cellular Dynamics as a Port-Hamiltonian System: A Composite Multi-Clock GNN-Surrogate for Multi-Omics Circadian Cell Biology},
+  journal = {bioRxiv},
+  year    = {2026},
+  doi     = {10.64898/2026.07.11.737972},
+  url     = {https://doi.org/10.64898/2026.07.11.737972}
+}
+```
+
 ## Citing
 
-If BioPhasor supports your research, please cite it — see
-[`CITATION.cff`](CITATION.cff), which GitHub renders as a ready-to-use citation
-in the sidebar.
+If BioPhasor supports your research, please cite the software and the relevant
+preprint above. [`CITATION.cff`](CITATION.cff) is rendered by GitHub as a
+ready-to-use citation in the sidebar.
 
 ## Governance
 

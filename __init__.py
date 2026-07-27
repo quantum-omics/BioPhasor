@@ -10,7 +10,7 @@ from importlib.metadata import version, PackageNotFoundError
 try:
     __version__ = version("biophasor")
 except PackageNotFoundError:
-    __version__ = "0.3.0"
+    __version__ = "0.1.0"
 
 # ── Core conveniences ─────────────────────────────────────────────────────────
 from biophasor.core.phasor import BioPhasor
