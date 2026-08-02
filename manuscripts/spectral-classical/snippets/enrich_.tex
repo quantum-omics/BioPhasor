@@ -1,0 +1,78 @@
+% ===== enrich_ : Module & taxonomy validation (Phase 4) =====
+\subsection{Biological annotation of the leading harmonics and the compartment layer}
+\label{sec:enrich}
+
+We tested whether the leading omics harmonics correspond to coherent biological
+programmes, and whether the five-compartment / seven-class layer is anchored to
+ground-truth annotation. For each dataset we aggregated the per-slice loading
+magnitude $\langle|\varphi_{n,i}|\rangle_s$ of the three leading harmonics and ran
+hypergeometric over-representation analysis (ORA) on the top-40 loading genes against
+nine hand-curated gene sets (circadian clock, cell cycle, OXPHOS/energy,
+immune/inflammation, sterol/lipid biosynthesis, redox/antioxidant, ECM/adhesion,
+IEG/signalling, xenobiotic metabolism; sets defined explicitly in the analysis code),
+using all mapped features as the background and Benjamini--Hochberg FDR correction.
+Enrichment was fully offline; no live annotation service was queried.
+
+\paragraph{The leading harmonic $\varphi_1$ is an expression-magnitude artefact, not a
+programme.} On \emph{neither} dataset did the top-loading genes of $\varphi_1$ enrich
+any gene set (minimum adjusted $p = 1.00$ on GSE10072; $0.77$ on GSE11923). Across all
+three leading harmonics the circadian dataset (GSE11923) produced no significant term
+(minimum adjusted $p = 0.77$). The reason is mechanical: because the omics connectome
+matrix is amplitude-weighted ($H_{ij}=c_{ij}\,\psi_i\psi_j^\ast$), $|\varphi_{1,i}|$
+tracks mean log-expression per feature (Spearman $\rho = 0.43$ on GSE10072, $\rho =
+0.42$ on GSE11923; both $p<10^{-17}$). The dominant mode therefore reports which genes
+are highly expressed, not which genes co-regulate.
+
+\paragraph{Core-clock genes do \emph{not} load preferentially on $\lambda_1$.} The
+central prediction --- that in circadian data the clock module dominates the leading
+harmonic --- is refuted. On GSE11923 core-clock genes load \emph{below} background on
+$\varphi_1$ (one-sided Mann--Whitney for clock $>$ background $p = 0.996$, rank-biserial
+$= -0.23$); the same holds on GSE10072 ($p > 0.999$, rank-biserial $= -0.40$)
+(Fig.~\ref{fig:enrich_clock}). Clock genes carry moderate, not extreme, expression and
+so sit in the body of the $|\varphi_1|$ distribution.
+
+\paragraph{Sub-leading modes recover annotation-supported biology --- on the cancer
+dataset only.} Once the amplitude-dominated $\varphi_1$ is set aside, coherent
+programmes appear in the sub-leading harmonics of GSE10072: $\varphi_2$ enriches the
+redox/antioxidant set ($k=9$, adjusted $p = 2.9\times10^{-3}$) and the circadian-clock
+set (adjusted $p = 1.4\times10^{-2}$), and $\varphi_3$ enriches IEG/signalling ($k=9$,
+adjusted $p = 5.1\times10^{-3}$) (Fig.~\ref{fig:enrich_ora}). Consistently, four of the
+five compartment marker sets load preferentially on $\varphi_2$ in GSE10072 (Clock,
+Redox, Signalling, Biosynthesis all Mann--Whitney $p<0.01$; Energy $p=0.10$). No
+sub-leading harmonic reached significance on the circadian dataset, and no compartment
+marker set loaded preferentially there.
+
+\paragraph{The compartment layer is descriptive, not a validated classifier.}
+The evidence does not support a mechanistic reading of the leading mode or of a
+seven spectral state classes. The leading harmonic is an expression-magnitude summary; the
+clock-loading prediction does not hold on the circadian dataset; and the
+only annotation-supported structure is confined to sub-leading modes and
+present in one of the two datasets. We therefore treat the Compartment Coupling
+Matrix and the spectral state classes as a descriptive decomposition rather than a
+mechanistic classifier: the sub-leading harmonics of the cancer dataset provide an
+annotation-consistent decomposition, but the leading mode and the five compartments
+should not be read as a ground-truth-anchored biological classifier.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{enrich_harmonic_enrichment.png}
+  \caption{Hypergeometric over-representation of nine curated gene sets among the top-40
+  loading genes of the three leading harmonics ($\varphi_1$ blue, $\varphi_2$ orange,
+  $\varphi_3$ green), for the cancer (GSE10072, left) and circadian (GSE11923, right)
+  datasets. Marker size is proportional to the overlap count; black-outlined markers are
+  significant at BH-adjusted $p<0.05$ (dashed line). The leading harmonic $\varphi_1$
+  enriches nothing on either dataset; significant terms appear only in the sub-leading
+  modes of the cancer dataset.}
+  \label{fig:enrich_ora}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\linewidth]{enrich_clock_loading.png}
+  \caption{Leading-harmonic loading $|\varphi_{1,i}|$ of core-clock genes (red) versus
+  all other features (grey); black bars are group medians. In both the circadian
+  (GSE11923, left) and cancer (GSE10072, right) datasets clock genes load at or below
+  background, refuting the prediction that the clock module dominates $\lambda_1$
+  (one-sided Mann--Whitney $p$ and rank-biserial correlation annotated).}
+  \label{fig:enrich_clock}
+\end{figure}

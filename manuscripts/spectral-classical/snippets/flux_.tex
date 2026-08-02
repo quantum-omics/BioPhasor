@@ -1,0 +1,113 @@
+% ===== flux_ : Non-zero-flux magnetic OCM & the magnetic-Laplacian lineage (Phase 3) =====
+\subsection{Zero cycle flux, and how to make the phase do topological work}
+\label{sec:flux}
+
+The default \OCM{} of \cref{eq:ocm} assigns each edge the phase
+$\arg H_{ij} = \theta_i-\theta_j$. This is a \emph{pure gradient} of the vertex
+potential $\theta$: around any cycle the edge phases telescope,
+\begin{equation}
+  (\theta_i-\theta_j)+(\theta_j-\theta_k)+(\theta_k-\theta_i)\equiv 0
+  \pmod{2\pi},
+  \label{eq:zeroflux}
+\end{equation}
+so the holonomy (cycle flux) vanishes identically. Equivalently, writing
+$u_i=e^{i\theta_i}$, the pure-phase form
+$H=\operatorname{diag}(u)\,C\,\operatorname{diag}(u)^{\dagger}$ is a unitary
+\emph{congruence} of the real coupling $C$, and by
+Proposition~\ref{prop:amp} it is isospectral with $C$ for every slice. We stress
+that this is a deliberate and interpretable design choice, not an oversight: the
+gradient phase guarantees gauge invariance (\cref{sec:theory-ocm}), keeps the
+spectrum a transparent function of amplitude $\times$ relative phase, and makes
+the eigenvectors readable as standing harmonics of a fixed affinity graph. The
+price is that in the gradient construction the \emph{phase carries no
+topological information} --- it is gauge-equivalent to a phaseless real operator,
+and cannot, by itself, encode a direction of flow around a loop.
+
+\paragraph{The magnetic-Laplacian lineage.}
+The natural way to make a phase do topological work is to let the edge phase
+carry an \emph{antisymmetric} part that is not a coboundary. This is precisely
+the device behind the Hermitian / magnetic-Laplacian family for directed and
+mixed graphs. Guo and Mohar's Hermitian adjacency matrix assigns a digraph edge
+the phase $\pm i$ according to its orientation, giving a Hermitian operator with
+a real spectrum that distinguishes a digraph from its reverse
+\citep{guo2017hermitian}. The magnetic Laplacian --- a complex deformation of
+the combinatorial Laplacian in which a ``charge'' parameter $q$ rotates each edge
+by $e^{\pm i 2\pi q}$ --- was used by Fanuel and co-workers to embed and cluster
+directed networks via magnetic eigenmaps
+\citep{fanuel2017magnetic,fanuel2018magnetic}, and Furutani et~al.\ built a full
+graph-signal-processing framework on the same Hermitian Laplacian
+\citep{furutani2019graph}. MagNet made the charged magnetic Laplacian the
+propagation operator of a spectral graph neural network, showing that the phase
+$q$ ``attunes spectral information to variation among directed cycles''
+\citep{zhang2021magnet}; MSGNN extended this to \emph{signed} directed graphs
+through a magnetic signed Laplacian \citep{he2022msgnn}. B\"ottcher and Porter
+placed the whole construction in the broader setting of networks with complex
+(Hermitian) edge weights, where the imaginary part encodes rotation/orientation
+between nodes \citep{bottcher2024complex}. In every case the power of the method
+comes from a \emph{non-zero cycle flux}: an Aharonov--Bohm-type phase around
+loops that a gradient can never produce.
+
+\paragraph{A non-zero-flux \OCM{} variant.}
+We therefore introduce, as an additive companion to \cref{eq:ocm}, a magnetic
+\OCM{} whose edge phase carries a genuinely antisymmetric orientation
+$A_{ij}=-A_{ji}$,
+\begin{equation}
+  H^{\rm mag}_{ij} \;=\; r_i r_j\, c_{ij}\,
+  \exp\!\big(i\,2\pi q\,A_{ij}\big),
+  \qquad
+  \Phi_{ijk} \;=\; 2\pi q\,(A_{ij}+A_{jk}+A_{ki}),
+  \label{eq:magocm}
+\end{equation}
+where $c_{ij}\ge 0$ is the same symmetric coupling as before, $r_i=|\psi_i|$ are
+the phasor amplitudes, and $q$ is a charge parameter. Because $A$ is
+antisymmetric but not a coboundary, the triangle flux $\Phi_{ijk}$ is generically
+non-zero and the operator is no longer a congruence of $C$: the spectrum now
+\emph{depends on the flux}. $H^{\rm mag}$ remains Hermitian by construction
+(we verify $\lVert H^{\rm mag}-H^{{\rm mag}\dagger}\rVert = 0$ to machine
+precision), so the harmonic interpretation of \cref{sec:theory-ocm} is
+preserved, and vertex-gauge shifts $\psi\to\psi e^{i\alpha}$ still leave the
+spectrum invariant --- only the flux, a gauge-invariant loop quantity, moves it.
+The antisymmetric part $A$ is estimated from a directed or signed relationship on
+a time-course: our reference estimator is the \emph{lead--lag} matrix
+($A_{ij}$ = the cross-correlation argmax lag by which feature $i$ leads $j$),
+with a signed one-step-predictive variant also provided.
+
+\paragraph{The flux does topological work.}
+A minimal directed triangle makes the distinction sharp. At zero flux the
+spectrum is $\{-1,-1,2\}$ (that of the unsigned triangle); tuning the charge to
+$q=\tfrac16$, i.e.\ a loop flux $\Phi=\pi$, moves it to $\{-2,1,1\}$, a
+maximal split of $2$ that no gradient phase can reach, since every gradient
+operator is isospectral with the same real coupling. On the real circadian
+time-course (GSE11923, $N=30$ rhythmicity-gated features) the lead--lag magnetic
+\OCM{} reduces at $q=0$ exactly to the amplitude-weighted real coupling
+($\lambda_{\max}=8.30$) and then drifts smoothly as the charge is increased: over
+$q\in[0,0.3]$ the leading eigenvalue falls from $8.30$ to $5.15$ and the smallest
+from $-0.56$ to $-2.08$, a maximum eigenvalue excursion of $38\%$ of the spectral
+radius (\cref{fig:flux}). The gradient \OCM{}, by contrast, is pinned to
+$\operatorname{spec}(C)$ for \emph{any} choice of phase. The non-zero-flux
+variant is thus the bridge that lets the phase encode topology: when a directed
+or signed coupling is available it turns the \OCM{} from a phase-decorated real
+graph into a genuine magnetic operator, at the cost of the transparent
+amplitude-$\times$-relative-phase reading that makes the gradient form the
+default. We regard the two as complementary --- the gradient \OCM{} for
+interpretable phase geometry on an undirected affinity graph, the magnetic
+\OCM{} for problems where the direction of flow around a cycle is itself the
+signal.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{flux_spectrum_dependence.png}
+  \caption{\textbf{A non-zero cycle flux makes the phase do topological work.}
+  \textbf{(a)} Eigenvalues of the magnetic \OCM{} on a directed triangle as a
+  function of the loop flux $\Phi/\pi$. At zero flux (dotted lines) the spectrum
+  is that of the unsigned coupling, $\{-1,-1,2\}$; at $\Phi=\pi$ it becomes
+  $\{-2,1,1\}$, unreachable by any gradient phase (which is isospectral with the
+  real coupling for every vertex phase). \textbf{(b)} The 30 eigenvalues of the
+  lead--lag magnetic \OCM{} on the GSE11923 circadian time-course versus the
+  charge $q$. At $q=0$ the operator equals the amplitude-weighted real coupling;
+  as $q$ grows the leading ($\lambda_{\max}$) and smallest ($\lambda_{\min}$)
+  eigenvalues drift by up to $38\%$ of the spectral radius, whereas the
+  gradient \OCM{} spectrum is flux-independent. The operator is Hermitian to
+  machine precision throughout.}
+  \label{fig:flux}
+\end{figure}

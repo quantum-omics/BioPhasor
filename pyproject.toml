@@ -5,11 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "biophasor"
 version = "0.1.0"
-description = "BioPhasor platform: unified phasor-geometric core (encoding, circular statistics, graphs, dynamics) with phnn and spectral omics domains"
+description = "BioPhasor platform: phasor geometry fitted to omics measurements — encoding, circular statistics, the Cell State Tensor, oscillator dynamics, and the spectral connectome (classical and second-quantized)"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-keywords = ["bioinformatics", "phasor", "omics", "multi-omics", "systems-biology", "single-cell"]
+keywords = [
+    "bioinformatics",
+    "phasor",
+    "omics",
+    "multi-omics",
+    "systems-biology",
+    "single-cell",
+    "circular-statistics",
+    "spectral-graph-theory",
+    "cell-state-tensor",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -20,6 +30,13 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
+# Runtime dependencies are the ones the package actually imports. Each was
+# checked against the source rather than carried forward: `seaborn` was imported
+# nowhere in the package, the experiments or the tests; `networkx` and `h5py`
+# are imported only by experiment scripts and moved to the `experiments` extra.
+# `torch` stays because `biophasor.core.phasor` imports it at module scope, so
+# `import biophasor.core` fails without it — `biophasor.ml` imports it lazily
+# and would not have required it on its own.
 dependencies = [
     "numpy>=1.24",
     "scipy>=1.11",
@@ -28,10 +45,7 @@ dependencies = [
     "anndata>=0.10",
     "scanpy>=1.9",
     "matplotlib>=3.8",
-    "seaborn>=0.13",
-    "networkx>=3.2",
     "pandas>=2.0",
-    "h5py>=3.9",
 ]
 
 [project.optional-dependencies]
@@ -40,18 +54,62 @@ spatial = ["squidpy>=1.4"]
 ml = ["torch-geometric>=2.5"]
 # Optional variational-circuit backend; classifier falls back gracefully without it.
 vpc = ["phasorflow>=0.3"]
-# Datasets + methods used only by experiments/ (not by the importable package):
-#   GEOparse  — shared GEO fetch/cache in experiments/_shared/common.py
-#   cptac     — CPTAC UCEC multi-omics loader (biophasor manuscript)
-#   mofapy2, snfpy, lifelines, tensorly — benchmark competitors / survival / TT
+# Datasets and comparison methods used ONLY by experiments/ — never by the
+# importable package. Nothing here may become a runtime dependency: the package
+# must install and import on a machine that runs no experiment.
+#
+#   GEOparse       — the shared GEO fetch/cache in experiments/_shared/common.py
+#   cptac          — CPTAC UCEC loader, now in experiments/_shared/revision_data.py
+#                    (it MOVED there when the matched complete-case matrix became
+#                    shared between the biophasor and tumor suites)
+#   mofapy2, snfpy — the two integration competitors in the biophasor benchmark
+#                    (exp12, exp12b)
+#   lifelines      — survival analysis in the biophasor suite
+#   tensorly       — tensor-train decomposition of the CST, biophasor exp07/exp08
+#   joblib         — imported directly by the spectral-classical benchmark
+#                    (codes/benchmark/_bench_cv.py, _bench_lc.py). It was
+#                    previously only transitive via scikit-learn, so a
+#                    scikit-learn that vendored or dropped it would have broken
+#                    the benchmark with an ImportError nowhere near its cause.
+#   physics-tenpy  — DMRG cross-check in experiments/spectral-quantum/codes/
+#                    run_dmrg.py. Optional even here: without it the driver uses
+#                    the cached scan and labels the output CACHED.
 experiments = [
     "GEOparse>=2.0",
     "cptac>=1.5",
-    "mofapy2>=0.7",
+    # Pinned exactly: mofapy2's factor-extraction surface differs between the
+    # 0.6 and 0.7 lines, and exp12 already has an extraction defect against it
+    # (see CHANGELOG, Known issues). A floating pin would make that defect
+    # version-dependent and therefore harder to diagnose.
+    "mofapy2==0.7.4",
     "snfpy>=0.2",
     "lifelines>=0.27",
     "tensorly>=0.8",
+    "joblib>=1.4",
+    "physics-tenpy>=1.0",
+    # Imported by experiment scripts only (exp03 graph layout; exp06/exp12 HDF5
+    # readback), previously carried as runtime dependencies of the package.
+    "networkx>=3.2",
+    "h5py>=3.9",
+    # snfpy 0.2.2 (the newest release; the project is unmaintained since 2020)
+    # calls sklearn.utils.check_array(force_all_finite=...), which scikit-learn
+    # renamed to ensure_all_finite in 1.6 and REMOVED in 1.7. Under
+    # scikit-learn 1.9 every SNF run raises TypeError and the benchmark records
+    # an error where the manuscript quotes ARI 0.95 / silhouette 0.08. Capping
+    # scikit-learn for the experiments extra restores those numbers; pinning
+    # snfpy instead would not, because no snfpy release fixes the call.
+    "scikit-learn>=1.3,<1.7",
 ]
+# There is deliberately no `quantum` extra. `biophasor.spectral.quantum` builds
+# its Fock space, Bose-Hubbard Hamiltonian and compartment covariance on numpy
+# and scipy alone. Grepping biophasor/, experiments/ and tests/ for an import of
+# qutip, quimb, qiskit, pennylane, cirq, tensornetwork or openfermion returns
+# nothing; the only mentions of those names are docstrings in biophasor exp10
+# and exp11 recording that the density-matrix and VQC-complexity analyses are
+# done analytically and need no circuit backend. Adding an empty extra would
+# advertise a dependency that does not exist. TeNPy is the one quantum-adjacent
+# dependency, and it belongs to an experiment script, so it sits in
+# `experiments` above.
 dev = ["pytest>=7.4", "pytest-cov", "black", "ruff", "mypy"]
 docs = [
     "mkdocs-material>=9.5",
@@ -59,45 +117,45 @@ docs = [
     "pymdown-extensions>=10.7",
     "mike>=2.0",              # versioned docs
 ]
+# `all` deliberately excludes nothing now that TeNPy is inside `experiments`;
+# expect a long install (torch-geometric, squidpy and TeNPy all build).
 all = ["biophasor[tda,spatial,ml,vpc,experiments,dev,docs]"]
 
 
 [project.urls]
 Repository = "https://github.com/quantum-omics-foundation/biophasor"
-Documentation = "https://biophasor.readthedocs.io"
+Documentation = "https://quantum-omics-foundation.github.io/biophasor"
+Changelog = "https://github.com/quantum-omics-foundation/biophasor/blob/main/CHANGELOG.md"
+# The port-Hamiltonian preprint is no longer listed: that family is not in this
+# package. It is cited by the repository that carries it.
 "Preprint (BioPhasor)" = "https://doi.org/10.64898/2026.07.17.739210"
-"Preprint (Port-Hamiltonian)" = "https://doi.org/10.64898/2026.07.11.737972"
+"Sibling repository (port-Hamiltonian)" = "https://github.com/quantum-omics-foundation/classical-virtual-omics"
 
-[tool.setuptools]
-# biophasor is the repo root.
-package-dir = { "biophasor" = "." }
-packages = [
-    "biophasor",
-    "biophasor.analysis",
-    "biophasor.core",
-    "biophasor.core.graph",
-    "biophasor.core.datagen",
-    "biophasor.cst",
-    "biophasor.dynamics",
-    "biophasor.integration",
-    "biophasor.io",
-    "biophasor.ml",
-    "biophasor.network",
-    "biophasor.transform",
-    "biophasor.utils",
-    "biophasor.visualization",
-    "biophasor.viz",
-    # ── domain subpackages (unified platform) ──
-    "biophasor.phnn",
-    "biophasor.phnn.models",
-    "biophasor.phnn.training",
-    "biophasor.phnn.utils",
-    "biophasor.spectral",
-    "biophasor.spectral.connectome",
-    "biophasor.spectral.omics",
-    "biophasor.spectral.quantum",
-    # ── vendored phasor-circuit engine (installed with the platform) ──
-]
+# Discovery rather than a hand-written list: the previous explicit `packages`
+# array had to be edited by hand whenever a subpackage was added or removed, and
+# it silently kept naming `biophasor.phnn`, `.core.graph`, `.core.datagen` and
+# `.network` after the port-Hamiltonian family was removed — an install from
+# that list fails on the missing directories. `package-dir` was also still
+# mapping `biophasor` to the repository root from the earlier flat layout,
+# which no longer holds now that the package sits in `biophasor/`.
+[tool.setuptools.packages.find]
+include = ["biophasor*"]
+exclude = ["experiments*", "manuscripts*", "legacy*", "notebooks*", "docs*", "tests*"]
+
+# The omics harmonic ladder that fixes the compartment self-energies is DATA,
+# not code, and setuptools ships no non-Python file it is not told about.
+#
+# Without this block, `biophasor/spectral/quantum/data/omega_k.npy` is absent
+# from a built wheel and `compartment_self_energies()` falls through its
+# resolution order — supplied spectrum, then the shipped ladder, then a
+# dependency-free synthetic spectrum — to the synthetic branch. It does not
+# raise: it returns a plausible epsilon ladder computed from the wrong
+# spectrum, and every downstream Bose-Hubbard observable is silently wrong.
+# An editable install hides the failure completely, because the file is still
+# on disk next to the source. `omega_provenance.json` records which branch was
+# taken, so a wheel install can be audited after the fact.
+[tool.setuptools.package-data]
+"biophasor.spectral.quantum" = ["data/*.npy", "data/*.json"]
 
 
 [tool.black]
@@ -106,8 +164,27 @@ target-version = ["py310"]
 
 [tool.ruff]
 line-length = 100
+exclude = ["notebooks"]
+
+# `select` moved under `lint` in ruff 0.2; at the top level it is deprecated and
+# on newer ruff it is ignored outright, which silently disabled the import-order
+# and pyflakes rules this project thinks it is running.
+[tool.ruff.lint]
 select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py re-exports the public API; those imports are the point.
+"biophasor/**/__init__.py" = ["F401"]
+# Experiment scripts name the symbols a reader expects to see at the top even
+# where a particular run does not reference every one.
+"experiments/**/*.py" = ["F401", "E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v --tb=short"
+# -q, not -v: the suite is 145 tests and a per-test line buries the summary.
+addopts = "-q --tb=short"
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+exclude = "(legacy|notebooks)/"

@@ -1,0 +1,46 @@
+% circ2_ : circadian phase recovery and out-of-sample validation
+\subsection{The phasor recovers circadian phase out-of-sample}
+\label{sec:res-circadian}
+
+We establish three properties of the circadian analysis: that the phasor phase
+recovers biological timing, that the collective spectral rhythm is not reducible
+to mean expression, and that it persists under a selection protocol independent of
+the tested rhythm. All three tests use the mouse liver time-course
+GSE11923 \citep{hughes2009harmonics} (48 hourly samples, CT18--65).
+
+\textbf{Phase-lag recovery.} For the twelve core-clock genes present on the array
+(\textit{Nr1d1}, \textit{Nr1d2}, \textit{Dbp}, \textit{Per1/2/3}, \textit{Cry1/2},
+\textit{Arntl}/Bmal1, \textit{Nfil3}, \textit{Tef}, \textit{Hlf}) we recovered each
+gene's circadian acrophase from the Spectral-Omics phasor phase $\theta$ and compared
+it to a direct 24\,h cosinor fit and to the established physiological peak order. The
+recovered acrophases are essentially identical to the cosinor acrophases
+(circular correlation $r_{\mathrm{circ}}=0.997$) and reproduce the known
+ordering---\textit{Nr1d1}/\textit{Dbp} in the early-to-mid subjective day,
+\textit{Per} genes near CT12, and \textit{Arntl}/Bmal1 in antiphase---with
+$r_{\mathrm{circ}}=0.93$ against literature peak times
+(Fig.~\ref{fig:circ2_phaselag}). The Bmal1--\textit{Per1} phase separation is
+11.2\,h, i.e.\ the expected $\sim$12\,h antiphase between the positive and
+negative limbs of the clock. The phasor encoding therefore preserves, rather than
+discards, circadian phase.
+
+\textbf{Spectral rhythm is not the mean-expression rhythm.} On the same gene set we
+compared the 24\,h cosinor $R^2$ of the collective spectral indicators to that of the
+simple mean log-expression (Fig.~\ref{fig:circ2_spectral}). The leading eigenvalue
+$\lambda_1$ largely tracks the mean (Pearson $r=0.87$, $R^2=0.40$), so it
+adds little beyond magnitude. The participation ratio, however, oscillates more
+strongly than the mean ($R^2=0.68$ vs.\ $0.62$), is nearly orthogonal to
+it (Pearson $r=0.21$), and peaks several hours later---structure the mean does
+not carry. The spectral rhythm is thus partly, but not wholly, reducible to mean
+expression.
+
+\textbf{Out-of-sample selection.} To separate gene selection from the tested
+rhythm, we
+selected rhythmic genes on the first day only (CT18--41; top 200 by cosinor $R^2$) and
+tested the collective spectral oscillation on the held-out second day (CT42--65). The
+out-of-sample 24\,h rhythm persists strongly: $\lambda_1$ $R^2=0.73$ and Fiedler
+gap $R^2=0.77$ on unseen timepoints (permutation $p=0.0005$ for $\lambda_1$,
+null 95th percentile $R^2=0.26$), both exceeding the held-out mean-expression fit
+($R^2=0.35$). As a rhythm-blind control, selecting the 200 highest-variance
+probes yields only weak collective rhythm ($\lambda_1$ $R^2=0.16$), confirming the
+signal is carried by genuinely rhythmic---not merely high-variance---genes. The
+circadian claim is therefore phase-informative and holds out-of-sample.

@@ -1,14 +1,24 @@
 cff-version: 1.2.0
-message: "If you use BioPhasor in your research, please cite the software and the relevant preprint below."
-title: "BioPhasor: Phasor Dynamics Library for Multi-Omics Data"
+message: "If you use BioPhasor in your research, please cite the software and the manuscript below."
+title: "BioPhasor: a phase-geometric platform for multi-omics"
 abstract: >-
-  BioPhasor is a Python library for phasor-based omics analysis and multi-omics
-  integration. It encodes biological measurements as complex numbers on the unit
-  circle, enabling circular statistics, phase coherence analysis, and
-  oscillatory dynamics for genomics, transcriptomics, proteomics, and
-  metabolomics data.
+  A Python library and reproducible experiment suites that fit phasor geometry
+  to omics measurements. Each feature is encoded as a complex phasor on the
+  unit circle, so a sample is a point on the N-torus and circular statistics,
+  spectral graph theory and coupled-oscillator dynamics apply directly. The
+  package provides phasor encoding and circular operators, manifold geometry,
+  the Cell State Tensor and its phase-coherence density matrix, Kuramoto and
+  circadian dynamics, multi-omics fusion, and the spectral connectome in both
+  its classical Hermitian form and a second-quantized Bose-Hubbard extension.
+  The quantum vocabulary denotes a quantum-simulable formalism with an exact
+  classical correspondence; no quantum advantage is claimed and no assertion is
+  made that cells are quantum systems.
 type: software
 authors:
+  - family-names: Sigdel
+    given-names: Dibakar
+  - family-names: Panday
+    given-names: Namuna
   - name: "Quantum Omics Foundation"
     website: "https://github.com/quantum-omics-foundation"
 version: 0.1.0
@@ -25,14 +35,18 @@ keywords:
   - transcriptomics
   - proteomics
   - metabolomics
+  - circular statistics
   - phase coherence
+  - phase-amplitude coupling
+  - cell state tensor
+  - spectral graph theory
+  - Hermitian connectome
   - Kuramoto model
   - circadian rhythms
   - cell cycle
-  - port-Hamiltonian
 preferred-citation:
   type: article
-  title: "BioPhasor: Decoding Cellular State Tensors from Multi-Omics Phasor Dynamics for Quantum Ready Systems Biology"
+  title: "BioPhasor: A Phase-Geometric Platform for Decoding Cellular State Tensors from Multi-Omics, toward Quantum-Ready Systems Biology"
   authors:
     - family-names: Sigdel
       given-names: Dibakar
@@ -43,16 +57,40 @@ preferred-citation:
   journal: bioRxiv
   doi: 10.64898/2026.07.17.739210
   url: "https://doi.org/10.64898/2026.07.17.739210"
+# The three companion manuscripts reproduced by this repository's other suites.
+# The port-Hamiltonian preprint is NOT listed: that work is not in this package.
+# It is cited by the repository that carries it, Classical-Virtual-Omics.
 references:
   - type: article
-    title: "Learning the Cellular Dynamics as a Port-Hamiltonian System: A Composite Multi-Clock GNN-Surrogate for Multi-Omics Circadian Cell Biology"
+    title: "Tumour-Specific Cross-Modal Phase-Amplitude Coupling Along the Central Dogma in Matched Multi-Omics"
     authors:
       - family-names: Sigdel
         given-names: Dibakar
       - family-names: Panday
         given-names: Namuna
     year: 2026
-    month: 7
-    journal: bioRxiv
-    doi: 10.64898/2026.07.11.737972
-    url: "https://doi.org/10.64898/2026.07.11.737972"
+    notes: "Reproduced by experiments/tumor; manuscript source in manuscripts/tumor."
+  - type: article
+    title: "Spectral-Omics: Phasor Vertices, Omics Connectome Harmonics, and the Compartment Coupling Matrix"
+    authors:
+      - family-names: Sigdel
+        given-names: Dibakar
+      - family-names: Panday
+        given-names: Namuna
+    year: 2026
+    notes: "Reproduced by experiments/spectral-classical; manuscript source in manuscripts/spectral-classical."
+  - type: article
+    title: "Spectral-Omics-Quantum: A Second-Quantized Omics Connectome Compartment Model"
+    authors:
+      - family-names: Sigdel
+        given-names: Dibakar
+      - family-names: Panday
+        given-names: Namuna
+    year: 2026
+    notes: "Reproduced by experiments/spectral-quantum; manuscript source in manuscripts/spectral-quantum."
+  - type: software
+    title: "Classical Virtual Omics: a port-Hamiltonian digital twin of the cell"
+    authors:
+      - name: "Quantum Omics Foundation"
+    notes: "Sibling repository (package cvomics). Carries the port-Hamiltonian family formerly in this tree."
+    repository-code: "https://github.com/quantum-omics-foundation/classical-virtual-omics"
