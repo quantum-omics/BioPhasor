@@ -13,31 +13,48 @@
 
 ---
 
-## What this is, and what it is not
+## The representation
 
-This repository **fits phasor geometry to omics measurements**. Each feature is
-mapped to a complex number $\psi = r\,e^{i\theta}$, so a sample becomes a point
-on the $N$-torus $\mathbb{T}^N$ and the tools of circular statistics, spectral
-graph theory and coupled-oscillator dynamics apply directly to it.
+BioPhasor encodes each omics feature as a **phasor** — a complex number
+$\psi = r\,e^{i\theta}$ carrying an amplitude and a phase. A sample becomes a
+point on the $N$-torus $\mathbb{T}^N$, and cellular state is analysed with
+circular statistics, coupled-oscillator dynamics and spectral graph theory
+rather than with methods that assume a Euclidean feature space.
 
-That is a representation choice, not a claim about biology. A cell is not a
-phasor, a gene is not an oscillator with a phase waiting to be read off, and
-nothing here is a quantum system. Where the code and the manuscripts use
-quantum vocabulary — density operators, Fock space, a Bose–Hubbard Hamiltonian —
-they mean a *quantum-simulable formalism applied to omics data*, with an exact
-classical↔quantum correspondence and **no quantum advantage claimed**. The
-distinction decides which sentences are defensible: a claim about the fitted
-geometry can be checked against the fit; a claim about the cell would need
-evidence the data do not supply.
+Abundance sets the phase through a tanh encoder on the log scale, so
+heavy-tailed distributions spread evenly around the circle instead of bunching:
 
-Treating a measurement as a phase makes a set of otherwise awkward questions
-natural to ask:
+$$\varphi = \pi \cdot \tanh\!\left(\frac{\log(1+x) - \mu}{\sigma}\right)$$
 
-- How synchronised is a pathway, as a single number in $[0, 1]$?
-- Which genes lead and which lag, and by how much?
-- Does a gene's transcript *phase* organise its protein *amplitude*?
-- What are the collective normal modes of a co-expression graph once the edges
-  carry a phase?
+Alignment of a feature set is then a single number, the mean resultant length:
+
+$$C = \left|\frac{1}{N}\sum_{n=1}^{N} e^{i\varphi_n}\right| \in [0, 1]$$
+
+Because both are defined on the circle, downstream analysis inherits circular
+means, phase differences that wrap correctly, and synchrony measures that do not
+depend on an arbitrary origin. Questions that are awkward in abundance space —
+how synchronised is a pathway, which genes lead and which lag, whether a
+transcript's phase organises its protein's amplitude — become direct
+measurements.
+
+## Two derived objects
+
+**The Cell State Tensor** is an order-3 latent field over regulatory, temporal
+and homeostatic axes. Its regulatory slice is the phase-coherence density matrix
+
+$$\rho = \frac{1}{M}\sum_m \boldsymbol z_m \boldsymbol z_m^{\dagger}$$
+
+whose off-diagonals are phase-locking values between features. From it follow
+the attractor landscape, limit cycles, knockout rankings and pathway-resolved
+decompositions of cellular state.
+
+**The Omics Connectome Matrix** is the Hermitian operator
+
+$$H_{ij} = c_{ij}\,\psi_i\psi_j^{*}$$
+
+built on a co-expression graph whose edges carry a phase. Its eigenvectors are
+the collective normal modes of that graph, and its spectrum yields compartment
+weights, coupling matrices and state classification.
 
 ## Installation
 
@@ -49,29 +66,15 @@ pip install -e .
 ```
 
 The core install carries numpy, scipy, pandas, matplotlib, scikit-learn,
-anndata, scanpy and torch — enough to import the whole package and run the test
-suite. Reproducing the manuscripts needs the `experiments` extra, which is
-where the datasets and the comparison methods live.
-
-| Extra | Adds | For |
-|---|---|---|
-| `experiments` | GEOparse, cptac, mofapy2, snfpy, lifelines, tensorly, joblib, networkx, h5py, physics-tenpy, `scikit-learn<1.7` | reproducing the four manuscripts |
-| `dev` | pytest, black, ruff, mypy | development |
-| `docs` | mkdocs-material, mkdocstrings, mike | building the documentation |
-| `tda` | gudhi | topological data analysis |
-| `spatial` | squidpy | spatial transcriptomics |
-| `ml` | torch-geometric | graph neural networks |
-| `vpc` | phasorflow | the variational phasor circuit backend (the classifier degrades without it) |
+anndata, scanpy and torch — enough to import the whole package and run the
+tests. Optional extras: `experiments` (dataset access and comparison methods),
+`dev`, `docs`, `tda` (gudhi), `spatial` (squidpy), `ml` (torch-geometric), and
+`vpc` (phasorflow, the variational phasor circuit backend).
 
 ```bash
-pip install -e ".[dev,experiments]"
+pip install -e ".[dev]"
+pytest
 ```
-
-The `experiments` extra caps scikit-learn below 1.7 deliberately. `snfpy`
-0.2.2 calls a scikit-learn keyword that 1.7 removed, and without the cap the
-SNF comparison in the biophasor benchmark raises instead of producing the
-numbers the manuscript quotes. See [`CHANGELOG.md`](CHANGELOG.md) under Known
-issues.
 
 ## Quick start
 
@@ -94,30 +97,6 @@ print(C.shape, round(float(C.min()), 3), round(float(C.max()), 3))
 amplitude weighting is given. A value near 0 means the features are dispersed
 around the circle; near 1 means they are aligned.
 
-## How it works
-
-**Tanh-phase encoding** maps a continuous measurement to phase, standardising on
-the log scale so that heavy-tailed omics distributions spread evenly around the
-circle rather than bunching:
-
-$$\varphi = \pi \cdot \tanh\!\left(\frac{\log(1+x) - \mu}{\sigma}\right)$$
-
-**Phase coherence** summarises how aligned a set of phases is:
-
-$$C = \left|\frac{1}{N}\sum_{n=1}^{N} e^{i\varphi_n}\right| \in [0, 1]$$
-
-Because both are defined on the circle, downstream analysis inherits circular
-statistics for free — circular means, phase differences that wrap correctly, and
-synchrony measures that do not depend on an arbitrary origin.
-
-Two derived objects carry most of the science. The **Cell State Tensor** is an
-order-3 latent field over regulatory, temporal and homeostatic axes whose
-regulatory slice is the phase-coherence density matrix
-$\rho = \frac{1}{M}\sum_m \boldsymbol z_m \boldsymbol z_m^{\dagger}$, whose
-off-diagonals are phase-locking values. The **Omics Connectome Matrix** is the
-Hermitian $H_{ij} = c_{ij}\,\psi_i\psi_j^{*}$ whose eigenvectors are the
-collective normal modes of a co-expression graph with phase-bearing edges.
-
 ## Package layout
 
 | Module | Contents |
@@ -129,7 +108,7 @@ collective normal modes of a co-expression graph with phase-bearing edges.
 | `biophasor.integration` | multi-omics fusion across modalities and cross-coherence matrices |
 | `biophasor.spectral.connectome` | phasor vertices, the Hermitian OCM, omics harmonics, the magnetic-OCM variant |
 | `biophasor.spectral.omics` | spectral indicators, the compartment coupling matrix, compartment weights, state classification |
-| `biophasor.spectral.quantum` | the second-quantized layer: Fock space over five compartment modes, the Bose–Hubbard Hamiltonian, compartment covariance, and the shipped omics harmonic ladder |
+| `biophasor.spectral.quantum` | second-quantized compartment model: Fock space over the five leading harmonics, a number-conserving Bose–Hubbard Hamiltonian, and the compartment covariance readout |
 | `biophasor.ml` | `PhasorClassifier` and circular loss functions |
 | `biophasor.io` | loaders for RNA-seq, single-cell, proteomics, metabolomics, with format auto-detection |
 | `biophasor.viz`, `.visualization` | phasor plots and figure helpers |
@@ -140,41 +119,18 @@ placeholder.
 
 ## Experiments
 
-Four suites live under `experiments/<suite>/`: `biophasor`, `tumor`,
-`spectral-classical` and `spectral-quantum`. Each imports the installed package,
-reads from the shared cache in `experiments/_shared/data/`, writes its numbers to
-its own `results/`, and is driven by
+Per-manuscript suites live under `experiments/`, each importing the installed
+package and driven by its own `run_all.py`. See
+[`experiments/README.md`](experiments/README.md).
 
-```bash
-python experiments/<suite>/codes/run_all.py --list    # what it will run
-python experiments/<suite>/codes/run_all.py --check   # validate inputs, run nothing
-python experiments/<suite>/codes/run_all.py           # run
-```
+## Scope
 
-Every suite ends with a number guard: each numeric literal quoted in the
-corresponding write-up must round-trip to a value in that suite's `results/*.json`
-at the precision written, or the guard fails with the nearest candidates.
-
-See [`experiments/README.md`](experiments/README.md).
-
-## Scope, and the sibling repository
-
-BioPhasor fits a *representation* to a measurement matrix: abundances are
-encoded onto the unit circle and the resulting phase structure is analysed.
-
-Dynamical-systems modelling of cellular state is a different question, and it
-has its own repository. **Classical-Virtual-Omics** (package `cvomics`)
-fits a port-Hamiltonian twin $(J, R, H, G)$ to multi-omic time courses and
-treats cell types, diseases and therapies as deformations of that quadruple.
-Reach for it when the object of interest is a trajectory or an intervention
-rather than the phase geometry of a snapshot.
-
-The two are deliberately separate installs: `cvomics` carries a training
-loop and its dependencies, `biophasor` needs neither. The coupled-oscillator
-machinery they might have shared lives here, in `biophasor.dynamics`.
-
-Superseded prior-generation code is not carried in this repository; it remains
-in the local source trees it came from.
+BioPhasor analyses the phase geometry of a measurement matrix. For
+dynamical-systems modelling of cellular state — a port-Hamiltonian twin
+$(J, R, H, G)$ fitted to multi-omic time courses, with cell types and diseases
+as deformations of it — see the sibling repository **Classical-Virtual-Omics**
+(package `cvomics`). The two are separate installs; the coupled-oscillator
+machinery lives here, in `biophasor.dynamics`.
 
 ## Contributing
 
@@ -191,10 +147,9 @@ See [`CITATION.cff`](CITATION.cff).
 
 ## Governance
 
-BioPhasor is stewarded by the **Quantum Omics Foundation**, a nonprofit
-organisation advancing open research and education at the interface of quantum
-computing and the life sciences. The Foundation's remit is to keep this work
-openly available, reproducible, and usable by the wider research community.
+Stewarded by the **Quantum Omics Foundation**, a nonprofit advancing open
+research and education at the interface of quantum computing and the life
+sciences.
 
 ## Licence
 
