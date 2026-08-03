@@ -24,7 +24,7 @@ rather than with methods that assume a Euclidean feature space.
 Abundance sets the phase through a tanh encoder on the log scale, so
 heavy-tailed distributions spread evenly around the circle instead of bunching:
 
-$$\varphi = \pi \cdot \tanh\!\left(\frac{\log(1+x) - \mu}{\sigma}\right)$$
+$$\varphi = \pi \cdot \tanh\\left(\frac{\log(1+x) - \mu}{\sigma}\right)$$
 
 Alignment of a feature set is then a single number, the mean resultant length:
 
