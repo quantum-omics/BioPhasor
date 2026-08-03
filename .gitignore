@@ -5,14 +5,12 @@ __pycache__/
 .DS_Store
 .env
 .venv*
-experiments/
+
 
 REPRODUCE.md
 reproduce.sh
-reproduce/
 manuscript/
 docs/
-results/
 notebooks/
 
 
