@@ -7,13 +7,6 @@ __pycache__/
 .venv*
 
 
-REPRODUCE.md
-reproduce.sh
-manuscript/
-docs/
-notebooks/
-
-
 # C extensions
 *.so
 
@@ -264,9 +257,10 @@ experiments/*/checkpoints/
 # ── Not published to GitHub ───────────────────────────────────────────────────
 # The public repository ships the installable `biophasor` package only.
 # Experiments, notebooks, manuscript sources, and built docs are kept local.
-experiments/
+
 docs/
 manuscript/
+notebooks/
 *.ipynb
 REPRODUCE.md
 reproduce.sh
