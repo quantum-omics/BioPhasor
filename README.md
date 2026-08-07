@@ -6,9 +6,10 @@
 
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21831941.svg)](https://doi.org/10.5281/zenodo.21831941)
+[![bioRxiv Preprint](https://img.shields.io/badge/bioRxiv-10.64898--2026.07.17.739210v1-b31b1b.svg)](https://www.biorxiv.org/content/10.64898/2026.07.17.739210v1)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Framework: PyTorch](https://img.shields.io/badge/Framework-PyTorch-ee4c2c.svg)](https://pytorch.org/)
 [![Stewarded by Quantum Omics Foundation](https://img.shields.io/badge/stewarded%20by-Quantum%20Omics%20Foundation-8a90ff.svg)](https://github.com/quantum-omics-foundation)
 
 </div>
