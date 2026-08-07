@@ -4,6 +4,8 @@
 
 **Phasor geometry fitted to omics measurements.**
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21831941.svg)](https://doi.org/10.5281/zenodo.21831941)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
