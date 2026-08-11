@@ -156,13 +156,29 @@ class CellStateTensor:
         """
         Global Coherence Metric (GCM): scalar summary of whole-cell phase synchrony.
 
-        GCM = |1/N Σ_i z_i| averaged over all axes.
+        GCM = |Σ_i z_i| / Σ_i |z_i|,  the amplitude-weighted circular mean
+        resultant length over every element of the tensor.
+
+        The denominator is the sum of moduli, not the element count. Dividing by
+        N instead — which is what ``|mean(tensor)|`` does — leaves the statistic
+        scaled by the mean amplitude and therefore *unbounded above*: a tensor
+        with identical phases and amplitudes around 1.6 returned 1.63, which no
+        coherence may do. With the sum of moduli the triangle inequality gives
+        |Σ z_i| <= Σ|z_i| exactly, so the value is in [0, 1] for any input, and
+        equals 1 iff every element shares one phase.
+
+        An all-zero tensor has no defined phase; 0.0 is returned for it rather
+        than raising, so callers sweeping a knockout to extinction do not have
+        to special-case the endpoint.
 
         Returns
         -------
         float ∈ [0, 1]
         """
-        return float(np.abs(self.tensor.mean()))
+        total_amplitude = float(np.abs(self.tensor).sum())
+        if total_amplitude == 0.0:
+            return 0.0
+        return float(np.abs(self.tensor.sum()) / total_amplitude)
 
     def phase_entropy(self, n_bins: int = 36) -> float:
         """
@@ -179,12 +195,28 @@ class CellStateTensor:
         """
         Pairwise phase synchrony S = (1/N²) Σ_{i,j} cos(φ_i - φ_j).
 
-        Measures limit cycle coherence across all regulatory modules.
+        Measures limit cycle coherence across all regulatory modules. The double
+        sum collapses to the squared modulus of the resultant, since
+        Σ_{i,j} cos(φ_i - φ_j) = Re[(Σ_i e^{iφ_i})(Σ_j e^{-iφ_j})] = |Σ_i e^{iφ_i}|²,
+        which is what is computed here.
+
+        Note the contraction that must NOT be used: ``z @ z.conj()`` is
+        Σ_i z_i z_i* = Σ_i |z_i|² = N for unit phasors, so ``Re(z @ z.conj())/N²``
+        is identically 1/N for *every* phase configuration and measures nothing.
+        The outer product |Σ z|², not the inner product Σ|z|², is the pairwise
+        sum this docstring describes.
+
+        Returns
+        -------
+        float ∈ [0, 1], equal to 1 for perfectly aligned phases and to O(1/N)
+        for phases drawn uniformly at random.
         """
         phases = self.phase.flatten()
         N = len(phases)
+        if N == 0:
+            return 0.0
         z = np.exp(1j * phases)
-        return float(np.real(z @ z.conj()) / N**2)
+        return float(np.abs(z.sum()) ** 2 / N**2)
 
     def state_velocity(self, cst_prev: "CellStateTensor") -> float:
         """

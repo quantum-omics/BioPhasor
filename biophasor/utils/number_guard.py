@@ -47,7 +47,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
 
-__all__ = ["GuardConfig", "GuardResult", "check_numbers", "run_guard", "run_guards"]
+__all__ = ["GuardConfig", "GuardResult", "Trace", "check_numbers", "run_guard",
+           "run_guards", "audit", "coincidence_rate"]
 
 #: LaTeX scientific notation, folded to a plain float before anything else so
 #: that ``$4.8\times10^{-8}$`` reads as one literal rather than as 4.8 and -8.
@@ -117,15 +118,43 @@ _STRIP = [
     (re.compile(r"\\(label|ref|eqref|cite|includegraphics|Tlab)\s*\[[^\]]*\]\{[^}]*\}"), " "),
     (re.compile(r"\\(label|ref|eqref|cite|includegraphics|Tlab)\{[^}]*\}"), " "),
     (re.compile(r"\\begin\{[^}]*\}|\\end\{[^}]*\}"), " "),
-    (re.compile(r"%.*"), " "),
+    # A LaTeX comment starts at an UNESCAPED percent sign. `\%` is a literal
+    # percent character in the prose, and the old rule `%.*` treated it as the
+    # start of a comment: every literal to the right of the first `\%` on a
+    # line was deleted before the guard ever saw it. On these manuscripts that
+    # silently exempted a large fraction of the Results section --- the lines
+    # that report a percentage are exactly the lines that also report the
+    # counts and coefficients behind it ("$70.4\%$ of $7{,}083$ genes"). The
+    # look-behind requires the percent NOT to be backslash-escaped.
+    (re.compile(r"(?<!\\)%.*"), " "),
     (re.compile(r"\\[A-Za-z]+"), " "),
     (re.compile(r"width=[0-9.]+"), " "),
 ]
 
 #: A leading minus is a sign only when it is not a hyphen inside a word:
 #: "arm-3" is not the number minus three.
+#:
+#: The trailing look-ahead is a BioPhasor addition. Without it the leading-hyphen
+#: guard is one-sided: it rejects the "-70" of "ZAP-70" because a letter precedes
+#: the hyphen, then matches the bare "70" on the next pass, because the character
+#: before it is now a hyphen rather than a letter. Every hyphenated gene or
+#: cytokine name in the manuscript --- ZAP-70, IL-6, CD8-positive --- therefore
+#: entered the guard as a measured number. Requiring that the digits not be
+#: followed by a letter, and rejecting a digit run whose preceding hyphen is
+#: itself preceded by a letter, closes it.
 _LITERAL = re.compile(
-    r"(?<![A-Za-z0-9])(-?\d+\.\d+(?:e[-+]?\d+)?|-?\d+e[-+]?\d+|-?\d+)")
+    r"(?<![A-Za-z0-9])(?<![A-Za-z]-)"
+    r"(-?\d+\.\d+(?:e[-+]?\d+)?|-?\d+e[-+]?\d+|-?\d+)(?![A-Za-z])")
+
+#: A TikZ picture is a drawing, and every number in it is a canvas coordinate,
+#: a node position, an angle, a colour percentage or a line width. The
+#: manuscript draws its encoding-pipeline and torus schematics inline, so
+#: without this rule the guard hunts for measured values of 8.4, 12.6, 16.8 and
+#: 23.5 that are the x-positions of boxes on a diagram. Stripping the whole
+#: environment is correct rather than convenient: a measurement is never stated
+#: only inside a drawing command, it is stated in the caption or the prose,
+#: both of which remain guarded.
+_TIKZ = re.compile(r"\\begin\{tikzpicture\}.*?\\end\{tikzpicture\}", re.S)
 
 
 @dataclass
@@ -231,10 +260,36 @@ def _rnd(x: float, sig: int) -> float:
     return round(x, d)
 
 
-def _matches(lit: float, val: float, sig: int) -> bool:
+#: A literal written as a PERCENTAGE, i.e. immediately followed by `\%` or `%`
+#: (with optional closing math delimiter or brace between). These manuscripts
+#: write "$70.4\%$ of genes" where the producing script stored the FRACTION
+#: 0.704, which is the natural unit for a rate. Without this the guard reports
+#: every percentage as untraceable and the fix looks like a whitelist entry,
+#: which would exempt the value rather than check it.
+_PERCENT_AFTER = re.compile(r"^[\$\}\s]*\\?%")
+
+
+def _is_percent(text: str, end: int) -> bool:
+    """Does the literal ending at ``end`` carry a percent sign?"""
+    return bool(_PERCENT_AFTER.match(text[end:end + 6]))
+
+
+def _matches(lit: float, val: float, sig: int, percent: bool = False) -> bool:
+    """Does ``lit`` round-trip to ``val`` at ``sig`` significant figures?
+
+    When ``percent`` is set the literal was written with a percent sign, so a
+    stored fraction is accepted as well as a stored percentage: "$70.4\\%$"
+    matches both 70.4 and 0.704. The precision claim is preserved --- the
+    fraction is compared at the same significant figures the literal was
+    written to.
+    """
     if val == 0:
         return abs(lit) < 1e-30
-    return _rnd(val, sig) == _rnd(lit, sig)
+    if _rnd(val, sig) == _rnd(lit, sig):
+        return True
+    if percent and _rnd(val, sig) == _rnd(lit / 100.0, sig):
+        return True
+    return False
 
 
 def _section(text: str, start: str, end: str | None) -> str:
@@ -283,7 +338,8 @@ def check_numbers(cfg: GuardConfig) -> GuardResult:
     # Order matters: join thousands groups before any digit-bearing construct is
     # stripped, fold mantissa-and-exponent before bare powers of ten, and only
     # then remove the LaTeX whose digits are not measurements.
-    clean = _THOUSANDS.sub("", sec)
+    clean = _TIKZ.sub(" ", sec)
+    clean = _THOUSANDS.sub("", clean)
     clean = _DASHRUN.sub(" ", clean)
     clean = _SCI.sub(lambda m: f"{m.group(1)}e{m.group(2)}", clean)
     clean = _POW10.sub(lambda m: f"1e{m.group(1)}", clean)
@@ -302,7 +358,8 @@ def check_numbers(cfg: GuardConfig) -> GuardResult:
             continue
         n_checked += 1
         sig = _sig_of(lit_str)
-        if not any(_matches(lit, v, sig) for v in vals.values()):
+        pct = _is_percent(clean, m.end())
+        if not any(_matches(lit, v, sig, pct) for v in vals.values()):
             near = sorted(vals.items(), key=lambda kv: abs(kv[1] - lit))[:3]
             unmatched.append((lit_str, near))
 
@@ -330,6 +387,172 @@ def run_guard(cfg: GuardConfig) -> int:
             print(f"      nearest: {k} = {v!r}")
     print(f"guard: {len(res.unmatched)} unmatched literal(s)")
     return 1
+
+
+# ----------------------------------------------------------------------------
+# Auditing extension: per-literal provenance, not pooled-bag membership.
+#
+# ``check_numbers`` above answers one question — does this literal equal SOME
+# value SOMEWHERE in the results pool. That is the right question for a
+# regression gate and the wrong one for an audit, because the pool is large:
+# on the biophasor suite it holds 26,386 numeric leaves, and 58% of arbitrary
+# three-decimal values in [0,1] round-trip to one of them by coincidence. A
+# literal that "passes" therefore carries almost no evidence that the number in
+# the prose is the number the experiment wrote.
+#
+# The functions below answer the question an audit needs: WHICH field does this
+# literal come from, and does its key path have anything to do with the sentence
+# it appears in. A literal whose only matches are in unrelated key paths is
+# reported as a coincidence rather than as a trace.
+# ----------------------------------------------------------------------------
+
+#: Split a JSON key path or a sentence into comparable lowercase word tokens.
+_WORDS = re.compile(r"[a-z]+")
+
+#: LaTeX markup that carries no evidence about which measurement is meant.
+_CTX_NOISE = frozenset({
+    "the", "a", "an", "of", "is", "at", "in", "on", "to", "for", "and", "or",
+    "with", "by", "as", "that", "this", "it", "its", "from", "than", "versus",
+    "vs", "we", "which", "are", "was", "were", "be", "textbf", "emph", "texttt",
+    "begin", "end", "label", "ref", "cite", "caption", "figure", "table",
+    "section", "subsection", "item", "left", "right", "frac", "mathcal", "text",
+})
+
+
+def _tokens(s: str) -> set[str]:
+    return {w for w in _WORDS.findall(s.lower()) if len(w) > 2} - _CTX_NOISE
+
+
+@dataclass
+class Trace:
+    """One numeric literal in the manuscript and where it came from.
+
+    literal   : the literal exactly as written in the source.
+    value     : the literal parsed to a float.
+    line      : 1-based line number in the .tex file.
+    context   : the source line, for the audit report.
+    verdict   : TRACEABLE | UNTRACEABLE | CONTRADICTED | STRUCTURAL.
+    matches   : every ``(key_path, value)`` in the results pool that round-trips
+                to this literal at the precision written.
+    best      : the match whose key path shares the most vocabulary with the
+                surrounding sentence, or None when nothing matched.
+    overlap   : how many words ``best``'s key path shares with the context. Zero
+                overlap on a value that matched only in unrelated fields is the
+                signature of a coincidence rather than a trace.
+    near      : nearest pool values, for UNTRACEABLE and CONTRADICTED literals.
+    """
+
+    literal: str
+    value: float
+    line: int
+    context: str
+    verdict: str
+    matches: list[tuple[str, float]] = field(default_factory=list)
+    best: tuple[str, float] | None = None
+    overlap: int = 0
+    near: list[tuple[str, float]] = field(default_factory=list)
+
+
+def _strip_tex(sec: str) -> str:
+    """Apply the tokenisation pipeline, preserving line structure.
+
+    ``check_numbers`` collapses the section to a single cleaned blob, which is
+    all a pass/fail gate needs. An audit has to name the line a defect lives on,
+    so every substitution here replaces with a same-line blank rather than
+    deleting, and no rule is allowed to consume a newline.
+    """
+    clean = _TIKZ.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), sec)
+    clean = _THOUSANDS.sub("", clean)
+    clean = _DASHRUN.sub(lambda m: " " * len(m.group(0)), clean)
+    clean = _SCI.sub(lambda m: f"{m.group(1)}e{m.group(2)}", clean)
+    clean = _POW10.sub(lambda m: f"1e{m.group(1)}", clean)
+    for pat, rep in _STRIP:
+        clean = pat.sub(lambda m: " " * len(m.group(0)) if "\n" not in m.group(0)
+                        else m.group(0), clean)
+    return clean
+
+
+def audit(cfg: GuardConfig, contradiction_tol: float = 0.02) -> list[Trace]:
+    """Classify every numeric literal in the guarded section.
+
+    A literal is CONTRADICTED rather than UNTRACEABLE when the results pool
+    holds a value within ``contradiction_tol`` relative distance whose key path
+    shares vocabulary with the sentence: that is a number the experiment
+    measured and the prose reports differently, which is a stronger defect than
+    a number with no source at all.
+    """
+    vals = _load_values(cfg.results_dir)
+    if not vals:
+        raise FileNotFoundError("guard: no results JSON — run the experiments first")
+
+    paths = [cfg.tex] if isinstance(cfg.tex, (str, Path)) else list(cfg.tex)
+    traces: list[Trace] = []
+    for p in paths:
+        with open(p) as fh:
+            full = fh.read()
+        try:
+            sec = _section(full, cfg.start, cfg.end)
+        except ValueError:
+            continue
+        line0 = full[: full.find(sec[:80])].count("\n") + 1
+        raw_lines = sec.split("\n")
+        for off, line in enumerate(_strip_tex(sec).split("\n")):
+            ctx = _tokens(raw_lines[off])
+            for m in _LITERAL.finditer(line):
+                lit_str = m.group(0)
+                try:
+                    lit = float(lit_str)
+                except ValueError:
+                    continue
+                if lit in cfg.whitelist:
+                    traces.append(Trace(lit_str, lit, line0 + off,
+                                        raw_lines[off].strip()[:160], "STRUCTURAL"))
+                    continue
+                sig = _sig_of(lit_str)
+                pct = _is_percent(line, m.end())
+                hits = [(k, v) for k, v in vals.items() if _matches(lit, v, sig, pct)]
+                near = sorted(vals.items(), key=lambda kv: abs(kv[1] - lit))[:3]
+                if hits:
+                    scored = sorted(
+                        ((len(_tokens(k) & ctx), k, v) for k, v in hits),
+                        key=lambda t: -t[0])
+                    ov, bk, bv = scored[0]
+                    traces.append(Trace(lit_str, lit, line0 + off,
+                                        raw_lines[off].strip()[:160], "TRACEABLE",
+                                        matches=hits, best=(bk, bv), overlap=ov,
+                                        near=near))
+                    continue
+                verdict = "UNTRACEABLE"
+                for k, v in near:
+                    if v != 0 and abs(v - lit) / max(abs(v), 1e-12) <= contradiction_tol \
+                            and _tokens(k) & ctx:
+                        verdict = "CONTRADICTED"
+                        break
+                traces.append(Trace(lit_str, lit, line0 + off,
+                                    raw_lines[off].strip()[:160], verdict, near=near))
+    return traces
+
+
+def coincidence_rate(cfg: GuardConfig, sig: int = 3,
+                     lo: float = 0.0, hi: float = 1.0) -> tuple[int, int, float]:
+    """How often an arbitrary value passes the pooled-bag test by chance.
+
+    Returns ``(n_grid, n_covered, fraction)``. The membership test in
+    ``check_numbers`` accepts a literal when its ``sig``-figure rounding equals
+    that of ANY pool value, so the pass rate for an arbitrary number is exactly
+    the fraction of the ``sig``-figure grid on ``[lo, hi]`` that the pool covers.
+    This is computed, not sampled.
+    """
+    vals = _load_values(cfg.results_dir)
+    sub = [v for v in vals.values() if lo <= v <= hi and v != 0]
+    pool = {round(_rnd(v, sig), 12) for v in sub}
+    step = 10.0 ** -sig if hi <= 1.0 else (hi - lo) / 1000.0
+    grid, x = [], lo + step
+    while x <= hi + step / 2:
+        grid.append(round(x, 10))
+        x += step
+    covered = sum(1 for g in grid if round(_rnd(g, sig), 12) in pool)
+    return len(grid), covered, covered / len(grid) if grid else 0.0
 
 
 def run_guards(configs: dict[str, GuardConfig]) -> int:
